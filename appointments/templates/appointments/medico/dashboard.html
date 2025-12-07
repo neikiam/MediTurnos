@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Médico - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-stethoscope text-primary"></i> Panel de Médico
+            </h1>
+            <p class="text-muted">Bienvenido/a, {{ user.get_full_name }}</p>
+        </div>
+    </div>
+    
+    <!-- Estadísticas del mes -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 mb-2">Turnos Este Mes</h6>
+                            <h2 class="fw-bold mb-0">{{ total_turnos_mes }}</h2>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded p-3">
+                            <i class="bi bi-calendar-month" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 mb-2">Atendidos Este Mes</h6>
+                            <h2 class="fw-bold mb-0">{{ turnos_atendidos_mes }}</h2>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded p-3">
+                            <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Turnos de hoy -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-calendar-day text-primary"></i> Turnos de Hoy
+                        </h5>
+                        <a href="{% url 'medico_agenda' %}" class="btn btn-sm btn-outline-primary">
+                            Ver Agenda Completa <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if turnos_hoy %}
+                    <div class="list-group list-group-flush">
+                        {% for turno in turnos_hoy %}
+                        <div class="list-group-item border-0 px-0">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="bg-primary bg-opacity-10 rounded p-3">
+                                        <h4 class="mb-0 text-primary">{{ turno.hora|time:"H:i" }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1">{{ turno.paciente.usuario.get_full_name }}</h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-heart-pulse"></i> {{ turno.especialidad.nombre }}
+                                        {% if turno.motivo_consulta %}
+                                        | {{ turno.motivo_consulta|truncatewords:8 }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-{{ turno.get_estado_color }} me-2">{{ turno.get_estado_display }}</span>
+                                    {% if turno.estado not in 'atendido,cancelado_medico,cancelado_paciente,ausente' %}
+                                    <a href="{% url 'medico_atender_turno' turno.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-clipboard-check"></i> Atender
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">No tienes turnos para hoy</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-clock text-warning"></i> Próximos Turnos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if proximos_turnos %}
+                    <div class="list-group list-group-flush">
+                        {% for turno in proximos_turnos %}
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ turno.paciente.usuario.get_full_name }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ turno.fecha|date:"d/m/Y" }}
+                                        <i class="bi bi-clock"></i> {{ turno.hora|time:"H:i" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4 mb-0">No hay turnos próximos</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-person-circle text-info"></i> Mi Perfil
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Matrícula:</strong> {{ medico.matricula }}</p>
+                    <p class="mb-2"><strong>Especialidades:</strong></p>
+                    <div class="mb-3">
+                        {% for esp in medico.especialidades.all %}
+                        <span class="badge bg-info me-1">{{ esp.nombre }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'medico_perfil' %}" class="btn btn-outline-primary btn-sm w-100">
+                        Ver Perfil Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

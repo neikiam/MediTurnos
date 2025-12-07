@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bienvenido a MediTurnos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white">
+    <div class="container py-5">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-3 fw-bold mb-4">Sistema de Turnos Médicos Profesional</h1>
+                <p class="lead mb-4">
+                    Gestiona tus consultas médicas de forma rápida, segura y eficiente. 
+                    Atención de calidad al alcance de un clic.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-speedometer2"></i> Ir al Panel
+                    </a>
+                    {% else %}
+                    <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-person-plus"></i> Registrarse
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <i class="bi bi-hospital display-1 text-white opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">¿Por qué elegir MediTurnos?</h2>
+            <p class="text-muted">Una plataforma completa para la gestión de turnos médicos</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Reserva Fácil</h4>
+                    <p class="text-muted">
+                        Agenda tu turno en segundos. Elige especialidad, médico y horario disponible de forma intuitiva.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-clock-history text-success" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Disponibilidad en Tiempo Real</h4>
+                    <p class="text-muted">
+                        Consulta horarios disponibles actualizados al instante. Sin esperas, sin llamadas.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-shield-check text-info" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Gestión Segura</h4>
+                    <p class="text-muted">
+                        Tus datos protegidos. Sistema seguro con diferentes niveles de acceso por rol.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-people text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Múltiples Especialidades</h4>
+                    <p class="text-muted">
+                        Accede a diversos profesionales y especialidades médicas en un solo lugar.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-bell text-danger" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Recordatorios</h4>
+                    <p class="text-muted">
+                        Nunca olvides tus citas. Sistema de notificaciones y recordatorios integrado.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-graph-up text-secondary" style="font-size: 2rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Historial Completo</h4>
+                    <p class="text-muted">
+                        Accede a tu historial de consultas y mantén un registro organizado de tus citas.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Especialidades Section -->
+{% if especialidades %}
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">Nuestras Especialidades</h2>
+            <p class="text-muted">Contamos con profesionales en diversas áreas de la medicina</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for especialidad in especialidades %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 hover-card">
+                    <div class="card-body text-center">
+                        <div class="especialidad-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-heart-pulse text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ especialidad.nombre }}</h5>
+                        <p class="text-muted small mb-0">{{ especialidad.descripcion|truncatewords:10 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<section class="cta-section bg-primary text-white py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">¿Listo para comenzar?</h2>
+        <p class="lead mb-4">Regístrate ahora y agenda tu primer turno médico en minutos</p>
+        <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-person-plus"></i> Crear Cuenta Gratis
+        </a>
+    </div>
+</section>
+{% endif %}
+
+<!-- Info Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="fw-bold mb-4">Atención Médica Profesional</h2>
+                <p class="text-muted mb-4">
+                    En MediTurnos nos comprometemos a brindar un servicio de excelencia. 
+                    Nuestro sistema permite una gestión eficiente de turnos, reduciendo tiempos 
+                    de espera y mejorando la experiencia tanto de pacientes como de profesionales médicos.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Atención de Lunes a Viernes</strong> de 7:00 a 16:00hs
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Profesionales Certificados</strong> en cada especialidad
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Sistema Digital</strong> completamente integrado
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>Soporte Continuo</strong> para pacientes y médicos
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="bg-primary bg-opacity-10 rounded p-5 text-center">
+                    <i class="bi bi-award display-1 text-primary mb-3"></i>
+                    <h3 class="fw-bold mb-3">Calidad Garantizada</h3>
+                    <p class="text-muted">
+                        Comprometidos con tu salud y bienestar
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-graph-up text-primary"></i> Estadísticas del Sistema
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Estadísticas</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Turnos por estado -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Turnos por Estado</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in turnos_por_estado %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>{{ item.estado }}</span>
+                        <span class="badge bg-primary">{{ item.total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Turnos por especialidad -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Turnos por Especialidad</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in turnos_por_especialidad %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>{{ item.especialidad__nombre }}</span>
+                        <span class="badge bg-info">{{ item.total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Médicos más solicitados -->
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Médicos Más Solicitados</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Posición</th>
+                                    <th>Médico</th>
+                                    <th>Total de Turnos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in medicos_populares %}
+                                <tr>
+                                    <td><strong>#{{ forloop.counter }}</strong></td>
+                                    <td>Dr/a. {{ item.medico__usuario__first_name }} {{ item.medico__usuario__last_name }}</td>
+                                    <td><span class="badge bg-success">{{ item.total }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

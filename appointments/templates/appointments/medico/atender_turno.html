@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Atender Turno - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-clipboard-check text-primary"></i> Atender Turno
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'medico_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'medico_agenda' %}">Agenda</a></li>
+                    <li class="breadcrumb-item active">Atender Turno</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información del Turno</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Paciente</small>
+                        <h6 class="fw-bold">{{ turno.paciente.usuario.get_full_name }}</h6>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">DNI</small>
+                        <p class="mb-0">{{ turno.paciente.usuario.dni }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Fecha y Hora</small>
+                        <p class="mb-0">
+                            <i class="bi bi-calendar"></i> {{ turno.fecha|date:"d/m/Y" }}<br>
+                            <i class="bi bi-clock"></i> {{ turno.hora|time:"H:i" }}
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Especialidad</small>
+                        <p class="mb-0">{{ turno.especialidad.nombre }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Estado Actual</small>
+                        <p><span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span></p>
+                    </div>
+                    
+                    {% if turno.motivo_consulta %}
+                    <div class="mb-3">
+                        <small class="text-muted">Motivo de Consulta</small>
+                        <p class="mb-0">{{ turno.motivo_consulta }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Datos del Paciente</small>
+                        <p class="small mb-1">
+                            <strong>Email:</strong> {{ turno.paciente.usuario.email }}<br>
+                            <strong>Teléfono:</strong> {{ turno.paciente.usuario.telefono }}
+                        </p>
+                        {% if turno.paciente.obra_social %}
+                        <p class="small mb-0">
+                            <strong>Obra Social:</strong> {{ turno.paciente.obra_social }}<br>
+                            <strong>N° Afiliado:</strong> {{ turno.paciente.numero_afiliado }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Actualizar Estado del Turno</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Guardar
+                            </button>
+                            <a href="{% url 'medico_agenda' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if turno.notas_medico %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Notas Anteriores</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ turno.notas_medico }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

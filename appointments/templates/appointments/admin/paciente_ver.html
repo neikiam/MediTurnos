@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalles de {{ paciente.usuario.get_full_name }} - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-person text-primary"></i> Detalles del Paciente
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin_pacientes' %}">Pacientes</a></li>
+                    <li class="breadcrumb-item active">{{ paciente.usuario.get_full_name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                        <i class="bi bi-person text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">{{ paciente.usuario.get_full_name }}</h4>
+                    <p class="text-muted mb-3">Paciente</p>
+                    
+                    <hr>
+                    
+                    <div class="text-start">
+                        <p class="mb-2"><strong>DNI:</strong> {{ paciente.usuario.dni }}</p>
+                        <p class="mb-2"><strong>Email:</strong> {{ paciente.usuario.email }}</p>
+                        <p class="mb-2"><strong>Teléfono:</strong> {{ paciente.usuario.telefono }}</p>
+                        <p class="mb-2"><strong>Dirección:</strong> {{ paciente.usuario.direccion|default:"No especificada" }}</p>
+                        <p class="mb-2"><strong>Fecha de Nacimiento:</strong> {{ paciente.usuario.fecha_nacimiento|date:"d/m/Y"|default:"No especificada" }}</p>
+                        <hr>
+                        <p class="mb-2"><strong>Obra Social:</strong> {{ paciente.obra_social|default:"Sin obra social" }}</p>
+                        <p class="mb-0"><strong>Número de Afiliado:</strong> {{ paciente.numero_afiliado|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">Historial de Turnos</h5>
+                </div>
+                <div class="card-body">
+                    {% if turnos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Médico</th>
+                                    <th>Especialidad</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for turno in turnos %}
+                                <tr>
+                                    <td>{{ turno.fecha|date:"d/m/Y" }}</td>
+                                    <td>{{ turno.hora|time:"H:i" }}</td>
+                                    <td>{{ turno.medico }}</td>
+                                    <td>{{ turno.especialidad.nombre }}</td>
+                                    <td><span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">No hay turnos registrados</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mi Perfil - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-person-circle text-primary"></i> Mi Perfil
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'paciente_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Mi Perfil</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+                        <i class="bi bi-person text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-1">{{ paciente.usuario.get_full_name }}</h4>
+                    <p class="text-muted mb-3">Paciente</p>
+                    
+                    <span class="badge bg-success mb-3">Cuenta Activa</span>
+                    
+                    <hr>
+                    
+                    <div class="text-start">
+                        <p class="mb-2"><strong>DNI:</strong> {{ paciente.usuario.dni }}</p>
+                        <p class="mb-2"><strong>Usuario:</strong> {{ paciente.usuario.username }}</p>
+                        <p class="mb-2"><strong>Email:</strong> {{ paciente.usuario.email }}</p>
+                        <p class="mb-2"><strong>Teléfono:</strong> {{ paciente.usuario.telefono }}</p>
+                        {% if paciente.usuario.fecha_nacimiento %}
+                        <p class="mb-0"><strong>Fecha de Nacimiento:</strong> {{ paciente.usuario.fecha_nacimiento|date:"d/m/Y" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Editar Información Personal</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <h6 class="fw-bold mb-3 text-primary">Datos Personales</h6>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellido</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                {{ form.telefono }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Dirección</label>
+                                {{ form.direccion }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="fw-bold mb-3 text-primary">Información de Cobertura Médica</h6>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Obra Social</label>
+                                {{ form.obra_social }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Número de Afiliado</label>
+                                {{ form.numero_afiliado }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observaciones</label>
+                                {{ form.observaciones }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Guardar Cambios
+                            </button>
+                            <a href="{% url 'paciente_dashboard' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
