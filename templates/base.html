@@ -123,18 +123,17 @@
                                     <small class="text-muted">{{ user.get_rol_display }}</small>
                                 </span>
                             </li>
-
-                            <li><hr class="dropdown-divider"></li>
-
-                            <li>
-                                <form method="post" action="{% url 'logout' %}" style="margin: 0; padding: 0;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item text-danger" style="cursor: pointer; border: none; background: none; text-align: left; width: 100%;">
-                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                                    </button>
-                                </form>
-                            </li>
                         </ul>
+                    </li>
+
+                    <!-- Botón de Cerrar Sesión separado -->
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-logout ms-2">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </button>
+                        </form>
                     </li>
 
                 </ul>
