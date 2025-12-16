@@ -58,6 +58,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-size: 16px;
 }
 
 main {
@@ -727,16 +728,29 @@ textarea.form-control {
     color: white;
 }
 
+.table-light thead {
+    background: var(--medical-cream);
+    color: var(--medical-dark);
+}
+
 .table th {
     padding: 1rem;
     text-align: left;
     font-weight: 600;
     border-bottom: 3px solid var(--medical-teal-dark);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-light th {
+    border-bottom: 2px solid var(--medical-gray);
 }
 
 .table td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--medical-gray);
+    font-size: 0.95rem;
 }
 
 .table tbody tr:hover {
@@ -745,6 +759,47 @@ textarea.form-control {
 
 .table-striped tbody tr:nth-child(even) {
     background: #f8fffe;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+/* ================================================
+   Button Group
+   ================================================ */
+.btn-group {
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.btn-group-sm .btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.btn-group .btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: -1px;
+}
+
+.btn-group .btn:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.btn-outline-danger {
+    background: transparent;
+    color: var(--color-danger);
+    border: 2px solid var(--color-danger);
+    box-shadow: none;
+}
+
+.btn-outline-danger:hover {
+    background: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
 }
 
 /* ================================================
@@ -1000,6 +1055,477 @@ textarea.form-control {
 }
 
 /* ================================================
+   Breadcrumb
+   ================================================ */
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.75rem 0;
+    margin-bottom: 0;
+    list-style: none;
+    background: transparent;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item {
+    padding-left: 0.5rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    padding-right: 0.5rem;
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    color: var(--medical-teal);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--medical-teal-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+
+/* ================================================
+   Dashboard Cards mejoradas
+   ================================================ */
+.stat-card-large {
+    background: white;
+    border-radius: 8px;
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    border-left: 5px solid var(--medical-teal);
+    transition: all 0.3s ease;
+}
+
+.stat-card-large:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card-large h6 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+    color: #6c757d;
+}
+
+.stat-card-large h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    color: var(--medical-teal);
+}
+
+/* Colores de fondo para cards de estadísticas */
+.bg-primary {
+    background: linear-gradient(135deg, var(--medical-teal) 0%, var(--medical-accent) 100%) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--medical-mint) 0%, #5da888 100%) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #7ab8cc 0%, #5a9fb5 100%) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #f4c77e 0%, #e6a547 100%) !important;
+}
+
+/* Tarjetas de texto blanco */
+.card.text-white h6 {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.card.text-white h2 {
+    color: white;
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+.bg-opacity-25 {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.rounded {
+    border-radius: 6px !important;
+}
+
+/* ================================================
+   Table responsive
+   ================================================ */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-hover tbody tr {
+    cursor: pointer;
+}
+
+.align-middle td,
+.align-middle th {
+    vertical-align: middle !important;
+}
+
+/* ================================================
+   Utilities adicionales
+   ================================================ */
+.col-auto {
+    flex: 0 0 auto;
+    width: auto;
+}
+
+.text-uppercase {
+    text-transform: uppercase !important;
+}
+
+.text-white {
+    color: white !important;
+}
+
+.container-fluid {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* ================================================
+   Mejorar tipografía general
+   ================================================ */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.2;
+    color: var(--medical-dark);
+}
+
+h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.3;
+    color: var(--medical-dark);
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.3;
+    color: var(--medical-dark);
+}
+
+h4 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+    color: var(--medical-dark);
+}
+
+h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+    color: var(--medical-dark);
+}
+
+h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.5;
+    color: var(--medical-dark);
+}
+
+p {
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+small {
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* ================================================
+   Empty state (No hay datos)
+   ================================================ */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xxl);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--medical-gray);
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.5;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* ================================================
+   List Group
+   ================================================ */
+.list-group {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.list-group-flush {
+    border-radius: 0;
+}
+
+.list-group-flush .list-group-item {
+    border-width: 0 0 1px;
+}
+
+.list-group-flush .list-group-item:last-child {
+    border-bottom-width: 0;
+}
+
+.list-group-item {
+    position: relative;
+    display: block;
+    padding: 0.75rem 1.25rem;
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.list-group-item-action {
+    color: var(--medical-dark);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.list-group-item-action:hover {
+    background-color: var(--medical-cream);
+    color: var(--medical-teal-dark);
+}
+
+.list-group-item.border-0 {
+    border: none;
+}
+
+/* ================================================
+   Flex utilities
+   ================================================ */
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+}
+
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+.ms-3 {
+    margin-left: var(--spacing-md) !important;
+}
+
+.me-3 {
+    margin-right: var(--spacing-md) !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-1 {
+    margin-bottom: var(--spacing-xs) !important;
+}
+
+.mb-2 {
+    margin-bottom: var(--spacing-sm) !important;
+}
+
+/* ================================================
+   Background opacity utilities
+   ================================================ */
+.bg-opacity-10 {
+    background-color: rgba(45, 106, 122, 0.1) !important;
+}
+
+.bg-success.bg-opacity-10 {
+    background-color: rgba(126, 196, 164, 0.1) !important;
+}
+
+.bg-warning.bg-opacity-10 {
+    background-color: rgba(244, 199, 126, 0.1) !important;
+}
+
+.bg-primary.bg-opacity-10 {
+    background-color: rgba(45, 106, 122, 0.1) !important;
+}
+
+.bg-info.bg-opacity-10 {
+    background-color: rgba(90, 159, 181, 0.1) !important;
+}
+
+/* ================================================
+   Text color utilities
+   ================================================ */
+.text-primary {
+    color: var(--medical-teal) !important;
+}
+
+.text-success {
+    color: var(--color-success) !important;
+}
+
+.text-info {
+    color: var(--color-info) !important;
+}
+
+.text-warning {
+    color: var(--color-warning) !important;
+}
+
+/* ================================================
+   Badge color alternatives
+   ================================================ */
+.bg-pendiente,
+.bg-yellow {
+    background-color: var(--color-warning) !important;
+}
+
+.bg-confirmado,
+.bg-blue {
+    background-color: var(--color-info) !important;
+}
+
+.bg-atendido,
+.bg-green {
+    background-color: var(--color-success) !important;
+}
+
+.bg-cancelado,
+.bg-red {
+    background-color: var(--color-danger) !important;
+}
+
+/* ================================================
+   Card header mejorado
+   ================================================ */
+.card-header.bg-white {
+    background-color: white !important;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+.card-footer.bg-white {
+    background-color: white !important;
+}
+
+/* ================================================
+   Btn outline variations
+   ================================================ */
+.btn-outline-primary {
+    background: transparent;
+    color: var(--medical-teal);
+    border: 2px solid var(--medical-teal);
+    box-shadow: none;
+}
+
+.btn-outline-primary:hover {
+    background: var(--medical-teal);
+    color: white;
+    border-color: var(--medical-teal);
+}
+
+/* ================================================
+   Icon sizing
+   ================================================ */
+.bi {
+    display: inline-block;
+    line-height: 1;
+}
+
+/* ================================================
+   Mejoras en tarjetas de estadísticas
+   ================================================ */
+.card.h-100 {
+    height: 100%;
+}
+
+.card.border-0 {
+    border: none;
+}
+
+.card-body h6 {
+    font-size: 0.875rem;
+}
+
+.card-body h4 {
+    font-size: 1.75rem;
+}
+
+.card-body h2 {
+    font-size: 2.5rem;
+}
+
+/* ================================================
+   Spacing adjustments para mejor diseño
+   ================================================ */
+.py-3 {
+    padding-top: var(--spacing-md) !important;
+    padding-bottom: var(--spacing-md) !important;
+}
+
+.px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.py-4 {
+    padding-top: var(--spacing-lg) !important;
+    padding-bottom: var(--spacing-lg) !important;
+}
+
+/* ================================================
    Responsive flex helpers
    ================================================ */
 .mb-lg-0 {
@@ -1013,5 +1539,13 @@ textarea.form-control {
     
     .mb-4 {
         margin-bottom: var(--spacing-lg) !important;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
     }
 }
