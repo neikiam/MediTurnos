@@ -51,6 +51,11 @@ def login_view(request):
 
 def logout_view(request):
     """Vista de logout"""
+    if request.method == 'POST':
+        logout(request)
+        messages.info(request, 'Has cerrado sesión correctamente.')
+        return redirect('inicio')
+    # Si es GET, también cerramos sesión por compatibilidad
     logout(request)
     messages.info(request, 'Has cerrado sesión correctamente.')
     return redirect('inicio')

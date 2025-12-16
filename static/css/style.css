@@ -619,3 +619,46 @@ a.text-decoration-none:hover {
     opacity: 0.8;
 }
 
+/* ================================================
+   Dropdown y botón de logout
+   ================================================ */
+.dropdown-menu {
+    border: 3px solid var(--medical-teal-dark);
+    border-radius: 6px;
+    box-shadow: var(--shadow-deep);
+    background: white;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+    color: var(--medical-dark);
+}
+
+.dropdown-item:hover {
+    background: var(--medical-cream);
+    color: var(--medical-teal-dark);
+}
+
+.dropdown-item.text-danger:hover {
+    background: #ffe5e5;
+    color: #c85a5a;
+}
+
+/* Botón de logout dentro del dropdown */
+form button.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+form button.dropdown-item:hover {
+    background: #ffe5e5;
+}
