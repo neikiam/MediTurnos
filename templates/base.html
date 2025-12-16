@@ -9,10 +9,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
 
-    <!-- Bootstrap 5 CSS (OK) -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-
-    <!-- Bootstrap Icons (OK) -->
+    <!-- Bootstrap Icons -->
     <link href="{% static 'css/bootstrap-icons.css' %}" rel="stylesheet">
 
     <!-- Google Fonts -->
@@ -26,21 +23,20 @@
 <body>
 
     {% if user.is_authenticated %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{% url 'inicio' %}">
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
                 <i class="bi bi-hospital"></i> MediTurnos
             </a>
 
-            <!-- BOTÓN MOBILE (corregido) -->
-            <button class="navbar-toggler" type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggle" id="navbarToggle" type="button" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+            <div class="navbar-menu" id="navbarMenu">
+                <ul class="nav-list">
 
                     {% if user.rol == 'admin' %}
                     <li class="nav-item">
@@ -50,21 +46,17 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" 
-                           id="navbarDropdownGestion"
-                           role="button" 
-                           data-bs-toggle="dropdown" 
-                           aria-expanded="false">
-                            <i class="bi bi-gear"></i> Gestión
-                        </a>
+                        <button class="nav-link dropdown-btn" type="button">
+                            <i class="bi bi-gear"></i> Gestión <i class="bi bi-chevron-down"></i>
+                        </button>
 
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownGestion">
-                            <li><a class="dropdown-item" href="{% url 'admin_especialidades' %}">Especialidades</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admin_medicos' %}">Médicos</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admin_pacientes' %}">Pacientes</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admin_turnos' %}">Turnos</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'admin_estadisticas' %}">Estadísticas</a></li>
+                        <ul class="dropdown-content">
+                            <li><a href="{% url 'admin_especialidades' %}">Especialidades</a></li>
+                            <li><a href="{% url 'admin_medicos' %}">Médicos</a></li>
+                            <li><a href="{% url 'admin_pacientes' %}">Pacientes</a></li>
+                            <li><a href="{% url 'admin_turnos' %}">Turnos</a></li>
+                            <li class="divider"></li>
+                            <li><a href="{% url 'admin_estadisticas' %}">Estadísticas</a></li>
                         </ul>
                     </li>
 
@@ -109,28 +101,19 @@
                     {% endif %}
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" 
-                           id="navbarDropdownUser"
-                           role="button" 
-                           data-bs-toggle="dropdown" 
-                           aria-expanded="false">
-                            <i class="bi bi-person-circle"></i> {{ user.get_full_name }}
-                        </a>
+                        <button class="nav-link dropdown-btn" type="button">
+                            <i class="bi bi-person-circle"></i> {{ user.get_full_name }} <i class="bi bi-chevron-down"></i>
+                        </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
-                            <li>
-                                <span class="dropdown-item-text">
-                                    <small class="text-muted">{{ user.get_rol_display }}</small>
-                                </span>
-                            </li>
+                        <ul class="dropdown-content dropdown-right">
+                            <li class="dropdown-text">{{ user.get_rol_display }}</li>
                         </ul>
                     </li>
 
-                    <!-- Botón de Cerrar Sesión separado -->
                     <li class="nav-item">
-                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        <form method="post" action="{% url 'logout' %}" class="inline-form">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-logout ms-2">
+                            <button type="submit" class="btn-logout">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                             </button>
                         </form>
@@ -144,11 +127,11 @@
     {% endif %}
 
     {% if messages %}
-    <div class="container mt-3">
+    <div class="container messages-container">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ message.tags }}">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
         </div>
         {% endfor %}
     </div>
@@ -158,34 +141,60 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-light text-center py-4 mt-5">
+    <footer class="footer">
         <div class="container">
-            <p class="text-muted mb-0">&copy; 2024 MediTurnos - Sistema de Gestión de Turnos Médicos</p>
-            <p class="text-muted mb-0"><small>Desarrollado por Elvira Fernández Ovando y Brian Ezequiel Guzmán</small></p>
+            <p>&copy; 2024 MediTurnos - Sistema de Gestión de Turnos Médicos</p>
+            <p><small>Desarrollado por Elvira Fernández Ovando y Brian Ezequiel Guzmán</small></p>
         </div>
     </footer>
 
     <!-- jQuery (requerido para las funcionalidades AJAX) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
-    <!-- Bootstrap 5 JS Bundle (incluye Popper para dropdowns, tooltips, etc.) -->
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-
-    <!-- Inicializar dropdowns de Bootstrap -->
+    <!-- Scripts personalizados -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar todos los dropdowns
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl);
+            // Toggle navbar mobile
+            const toggle = document.getElementById('navbarToggle');
+            const menu = document.getElementById('navbarMenu');
+            
+            if (toggle) {
+                toggle.addEventListener('click', function() {
+                    menu.classList.toggle('active');
+                    toggle.classList.toggle('active');
+                });
+            }
+
+            // Dropdowns
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn');
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.closest('.dropdown');
+                    const isActive = parent.classList.contains('active');
+                    
+                    // Cerrar todos los dropdowns
+                    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+                    
+                    // Toggle el actual
+                    if (!isActive) {
+                        parent.classList.add('active');
+                    }
+                });
+            });
+
+            // Cerrar dropdowns al hacer click fuera
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+                }
             });
 
             // Auto-cerrar alertas después de 5 segundos
-            const alerts = document.querySelectorAll('.alert-dismissible');
+            const alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(alert) {
                 setTimeout(function() {
-                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                    bsAlert.close();
+                    alert.remove();
                 }, 5000);
             });
         });
