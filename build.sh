@@ -17,26 +17,41 @@ echo "Colectando archivos estáticos..."
 python manage.py collectstatic --no-input --clear
 
 echo "Creando superusuario si no existe..."
-python manage.py shell << EOF
+python manage.py shell << 'EOF'
 from django.contrib.auth import get_user_model
 import os
+import sys
 
 User = get_user_model()
 username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@mediturnos.com')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(
-        username=username,
-        email=email,
-        password=password,
-        dni='00000000',
-        rol='admin'
-    )
-    print(f'Superuser {username} created successfully')
-else:
-    print(f'Superuser {username} already exists')
+try:
+    # Verificar si el usuario ya existe
+    if User.objects.filter(username=username).exists():
+        print(f'Superuser {username} already exists')
+    else:
+        # Buscar un DNI único
+        dni = '00000000'
+        counter = 0
+        while User.objects.filter(dni=dni).exists():
+            counter += 1
+            dni = f'{counter:08d}'
+        
+        # Crear superusuario
+        user = User.objects.create_superuser(
+            username=username,
+            email=email,
+            password=password,
+            dni=dni,
+            rol='admin'
+        )
+        print(f'Superuser {username} created successfully with DNI {dni}')
+except Exception as e:
+    print(f'Error creating superuser: {e}')
+    # No fallar el build si el superusuario no se puede crear
+    pass
 EOF
 
 echo "Build completado exitosamente"
