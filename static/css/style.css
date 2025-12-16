@@ -855,26 +855,103 @@ textarea.form-control {
 .feature-card {
     background: white;
     border-radius: 8px;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xl);
     box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
     height: 100%;
+    border: 2px solid transparent;
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
+    border-color: var(--medical-teal);
 }
 
 .feature-card i {
     font-size: 3rem;
     color: var(--medical-teal);
     margin-bottom: var(--spacing-md);
+    display: block;
 }
 
-.feature-card h3 {
+.feature-card h3,
+.feature-card h4 {
     color: var(--medical-teal-dark);
     margin-bottom: var(--spacing-sm);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.feature-card p {
+    color: #6c757d;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Eliminar fondos de colores en iconos */
+.feature-icon {
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    display: block !important;
+    margin: 0 auto var(--spacing-md) !important;
+}
+
+.feature-icon i {
+    color: var(--medical-teal) !important;
+    font-size: 3.5rem !important;
+}
+
+/* Iconos en cards de dashboard - sin fondos */
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin-right: var(--spacing-md) !important;
+}
+
+.flex-shrink-0 i {
+    font-size: 2.5rem !important;
+}
+
+.flex-shrink-0 .bi-clock {
+    color: var(--color-warning) !important;
+}
+
+.flex-shrink-0 .bi-check-circle {
+    color: var(--color-success) !important;
+}
+
+.flex-shrink-0 .bi-graph-up {
+    color: var(--color-info) !important;
+}
+
+/* Iconos en list-group */
+.list-group-item i {
+    font-size: 1.75rem !important;
+}
+
+.list-group-item .bi-calendar-plus {
+    color: var(--medical-teal) !important;
+}
+
+.list-group-item .bi-person-plus {
+    color: var(--color-success) !important;
+}
+
+.list-group-item .bi-heart-pulse {
+    color: var(--color-info) !important;
+}
+
+.list-group-item .bi-graph-up,
+.list-group-item .bi-lightning-charge {
+    color: var(--color-warning) !important;
+}
+
+.list-group-item .bi-clock-history {
+    color: var(--color-info) !important;
 }
 
 .hover-card {
@@ -1134,29 +1211,44 @@ textarea.form-control {
 }
 
 .bg-success {
-    background: linear-gradient(135deg, var(--medical-mint) 0%, #5da888 100%) !important;
+    background: linear-gradient(135deg, #5da888 0%, #4a9270 100%) !important;
 }
 
 .bg-info {
-    background: linear-gradient(135deg, #7ab8cc 0%, #5a9fb5 100%) !important;
+    background: linear-gradient(135deg, #5a9fb5 0%, #4a8a9d 100%) !important;
 }
 
 .bg-warning {
-    background: linear-gradient(135deg, #f4c77e 0%, #e6a547 100%) !important;
+    background: linear-gradient(135deg, #e6a547 0%, #d49535 100%) !important;
 }
 
 /* Tarjetas de texto blanco */
 .card.text-white h6 {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 1px;
 }
 
 .card.text-white h2 {
     color: white;
-    font-size: 2.25rem;
+    font-size: 2.5rem;
     font-weight: 700;
+}
+
+/* Iconos en cards de colores */
+.card.bg-primary .bi,
+.card.bg-success .bi,
+.card.bg-info .bi,
+.card.bg-warning .bi {
+    color: white !important;
+    font-size: 2rem !important;
+}
+
+.bg-white.bg-opacity-25 {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    padding: var(--spacing-md) !important;
+    border-radius: 6px;
 }
 
 .opacity-75 {
@@ -1384,23 +1476,32 @@ small {
    Background opacity utilities
    ================================================ */
 .bg-opacity-10 {
-    background-color: rgba(45, 106, 122, 0.1) !important;
+    background-color: transparent !important;
 }
 
 .bg-success.bg-opacity-10 {
-    background-color: rgba(126, 196, 164, 0.1) !important;
+    background-color: transparent !important;
 }
 
 .bg-warning.bg-opacity-10 {
-    background-color: rgba(244, 199, 126, 0.1) !important;
+    background-color: transparent !important;
 }
 
 .bg-primary.bg-opacity-10 {
-    background-color: rgba(45, 106, 122, 0.1) !important;
+    background-color: transparent !important;
 }
 
 .bg-info.bg-opacity-10 {
-    background-color: rgba(90, 159, 181, 0.1) !important;
+    background-color: transparent !important;
+}
+
+.bg-danger.bg-opacity-10 {
+    background-color: transparent !important;
+}
+
+.rounded-circle {
+    border-radius: 50% !important;
+    display: none !important;
 }
 
 /* ================================================
@@ -1411,15 +1512,19 @@ small {
 }
 
 .text-success {
-    color: var(--color-success) !important;
+    color: #5da888 !important;
 }
 
 .text-info {
-    color: var(--color-info) !important;
+    color: #4a8a9d !important;
 }
 
 .text-warning {
-    color: var(--color-warning) !important;
+    color: #d49535 !important;
+}
+
+.text-danger {
+    color: var(--color-danger) !important;
 }
 
 /* ================================================
@@ -1450,14 +1555,31 @@ small {
    ================================================ */
 .card-header.bg-white {
     background-color: white !important;
+    border-bottom: 2px solid var(--medical-cream);
 }
 
 .card-header h5 {
     margin-bottom: 0;
+    color: var(--medical-teal-dark);
+    font-weight: 700;
+}
+
+.card-header h5 i {
+    color: var(--medical-teal);
 }
 
 .card-footer.bg-white {
     background-color: white !important;
+    border-top: 2px solid var(--medical-cream);
+}
+
+/* Header icons colors */
+.card-header .bi-lightning-charge {
+    color: #d49535 !important;
+}
+
+.card-header .bi-clock-history {
+    color: #4a8a9d !important;
 }
 
 /* ================================================
