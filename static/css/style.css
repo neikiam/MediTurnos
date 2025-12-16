@@ -678,74 +678,41 @@ a.text-decoration-none:hover {
     box-shadow: var(--shadow-deep);
     background: white;
     padding: 0.5rem 0;
-    margin-top: 0.5rem !important;
+    margin-top: 0.5rem;
     min-width: 220px;
     z-index: 1050;
 }
 
-.dropdown-menu.show {
-    display: block;
-    animation: fadeInDown 0.3s ease-out;
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .dropdown-item {
     padding: 0.75rem 1.25rem;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     color: var(--medical-dark);
     cursor: pointer;
     font-size: 0.95rem;
-    display: block;
-    width: 100%;
-    clear: both;
-    font-weight: 400;
-    text-align: left;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    text-decoration: none;
 }
 
-.dropdown-item:hover,
-.dropdown-item:focus {
-    background: var(--medical-cream) !important;
-    color: var(--medical-teal-dark) !important;
-    text-decoration: none;
+.dropdown-item:hover {
+    background-color: var(--medical-cream);
+    color: var(--medical-teal-dark);
 }
 
 .dropdown-item:active {
-    background: var(--medical-teal-light) !important;
-    color: white !important;
+    background-color: var(--medical-teal-light);
+    color: white;
 }
 
 .dropdown-item.text-danger:hover {
-    background: #ffe5e5 !important;
-    color: #c85a5a !important;
+    background-color: #ffe5e5;
+    color: #c85a5a;
 }
 
-/* Botón de logout dentro del dropdown */
-form button.dropdown-item {
+.dropdown-divider {
+    border-top: 2px solid var(--medical-gray);
+    margin: 0.5rem 0;
+}
+
+.dropdown-item-text {
     display: block;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: none;
-    background: none;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-}
-
-form button.dropdown-item:hover {
-    background: #ffe5e5;
+    padding: 0.5rem 1.25rem;
+    color: #6c757d;
 }
