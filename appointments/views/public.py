@@ -14,7 +14,12 @@ def inicio(request):
     """Página de bienvenida"""
     especialidades = Especialidad.objects.filter(activo=True)
     medicos = Medico.objects.filter(activo=True).select_related('usuario')[:6]
-    config = ConfiguracionSistema.get_configuracion()
+    
+    try:
+        config = ConfiguracionSistema.get_configuracion()
+    except Exception:
+        # Si falla, crear una configuración por defecto
+        config = None
     
     context = {
         'especialidades': especialidades,

@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: mediturnos
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DEBUG
+        value: False
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mediturnos-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: admin@mediturnos.com
+      - key: DJANGO_SUPERUSER_PASSWORD
+        generateValue: true
+
+databases:
+  - name: mediturnos-db
+    databaseName: mediturnos
+    user: mediturnos

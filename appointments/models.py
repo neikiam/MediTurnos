@@ -15,10 +15,13 @@ class Usuario(AbstractUser):
     rol = models.CharField(max_length=10, choices=ROLES, default='paciente')
     dni = models.CharField(max_length=8, unique=True, validators=[
         RegexValidator(r'^\d{7,8}$', 'Ingrese un DNI válido (7-8 dígitos)')
-    ])
+    ], blank=True, null=True)
     telefono = models.CharField(max_length=15, blank=True)
     direccion = models.CharField(max_length=200, blank=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
+    
+    # Campos requeridos para createsuperuser
+    REQUIRED_FIELDS = ['email']
     
     class Meta:
         verbose_name = 'Usuario'
