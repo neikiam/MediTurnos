@@ -107,8 +107,11 @@ body {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
     position: relative;
-    padding: 0.5rem 1rem !important;
+    padding: 0.65rem 1.2rem !important;
     cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
 }
 
 .nav-link:hover {
@@ -136,10 +139,12 @@ body {
 /* Dropdown toggle específico */
 .dropdown-toggle {
     cursor: pointer !important;
+    padding: 0.65rem 1.2rem !important;
+    min-height: 44px;
 }
 
 .dropdown-toggle::after {
-    margin-left: 0.5rem;
+    margin-left: 0.6rem;
 }
 
 /* ================================================
@@ -674,7 +679,8 @@ a.text-decoration-none:hover {
     background: white;
     padding: 0.5rem 0;
     margin-top: 0.5rem !important;
-    min-width: 200px;
+    min-width: 220px;
+    z-index: 1050;
 }
 
 .dropdown-menu.show {
@@ -694,26 +700,37 @@ a.text-decoration-none:hover {
 }
 
 .dropdown-item {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem;
     transition: all 0.2s ease;
     color: var(--medical-dark);
     cursor: pointer;
+    font-size: 0.95rem;
+    display: block;
+    width: 100%;
+    clear: both;
+    font-weight: 400;
+    text-align: left;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    text-decoration: none;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-    background: var(--medical-cream);
-    color: var(--medical-teal-dark);
+    background: var(--medical-cream) !important;
+    color: var(--medical-teal-dark) !important;
+    text-decoration: none;
 }
 
 .dropdown-item:active {
-    background: var(--medical-teal-light);
-    color: white;
+    background: var(--medical-teal-light) !important;
+    color: white !important;
 }
 
 .dropdown-item.text-danger:hover {
-    background: #ffe5e5;
-    color: #c85a5a;
+    background: #ffe5e5 !important;
+    color: #c85a5a !important;
 }
 
 /* Botón de logout dentro del dropdown */
