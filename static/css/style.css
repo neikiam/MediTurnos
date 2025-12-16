@@ -94,6 +94,13 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
     letter-spacing: 0.5px;
     font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
 }
 
 .nav-link {
@@ -101,6 +108,7 @@ body {
     transition: all 0.3s ease;
     position: relative;
     padding: 0.5rem 1rem !important;
+    cursor: pointer;
 }
 
 .nav-link:hover {
@@ -123,6 +131,15 @@ body {
 
 .nav-link:hover::after {
     width: 80%;
+}
+
+/* Dropdown toggle específico */
+.dropdown-toggle {
+    cursor: pointer !important;
+}
+
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
 }
 
 /* ================================================
@@ -628,17 +645,42 @@ a.text-decoration-none:hover {
     box-shadow: var(--shadow-deep);
     background: white;
     padding: 0.5rem 0;
+    margin-top: 0.5rem !important;
+    min-width: 200px;
+}
+
+.dropdown-menu.show {
+    display: block;
+    animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
     padding: 0.5rem 1rem;
     transition: all 0.2s ease;
     color: var(--medical-dark);
+    cursor: pointer;
 }
 
-.dropdown-item:hover {
+.dropdown-item:hover,
+.dropdown-item:focus {
     background: var(--medical-cream);
     color: var(--medical-teal-dark);
+}
+
+.dropdown-item:active {
+    background: var(--medical-teal-light);
+    color: white;
 }
 
 .dropdown-item.text-danger:hover {

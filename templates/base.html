@@ -28,7 +28,7 @@
     {% if user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+            <a class="navbar-brand fw-bold" href="{% url 'inicio' %}">
                 <i class="bi bi-hospital"></i> MediTurnos
             </a>
 
@@ -51,11 +51,14 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" 
-                           role="button" data-bs-toggle="dropdown">
+                           id="navbarDropdownGestion"
+                           role="button" 
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false">
                             <i class="bi bi-gear"></i> Gestión
                         </a>
 
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownGestion">
                             <li><a class="dropdown-item" href="{% url 'admin_especialidades' %}">Especialidades</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin_medicos' %}">Médicos</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin_pacientes' %}">Pacientes</a></li>
@@ -107,11 +110,14 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" 
-                           role="button" data-bs-toggle="dropdown">
+                           id="navbarDropdownUser"
+                           role="button" 
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false">
                             <i class="bi bi-person-circle"></i> {{ user.get_full_name }}
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li>
                                 <span class="dropdown-item-text">
                                     <small class="text-muted">{{ user.get_rol_display }}</small>
@@ -166,9 +172,16 @@
     <!-- Bootstrap 5 JS Bundle (incluye Popper para dropdowns, tooltips, etc.) -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
-    <!-- Auto-cerrar alertas después de 5 segundos -->
+    <!-- Inicializar dropdowns de Bootstrap -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar todos los dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+
+            // Auto-cerrar alertas después de 5 segundos
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(function(alert) {
                 setTimeout(function() {
