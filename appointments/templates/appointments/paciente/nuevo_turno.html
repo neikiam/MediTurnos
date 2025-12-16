@@ -136,7 +136,7 @@ $(document).ready(function() {
                 },
                 success: function(data) {
                     $('#loading').addClass('d-none');
-                    if (data.length > 0) {
+                    if (Array.isArray(data) && data.length > 0) {
                         var options = '<option value="">Seleccione un horario</option>';
                         $.each(data, function(i, slot) {
                             options += '<option value="' + slot.hora + '">' + slot.hora + '</option>';
@@ -146,9 +146,21 @@ $(document).ready(function() {
                         $('#id_hora').html('<option value="">No hay horarios disponibles</option>');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
                     $('#loading').addClass('d-none');
-                    $('#id_hora').html('<option value="">Error al cargar horarios</option>');
+                    var errorMsg = 'Error al cargar horarios';
+                    
+                    // Mostrar mensaje específico si viene del servidor
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    }
+                    
+                    $('#id_hora').html('<option value="">' + errorMsg + '</option>');
+                    
+                    // Mostrar alerta al usuario
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        alert(errorMsg);
+                    }
                 }
             });
         }

@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 
 from ..models import Medico, HorarioAtencion, Turno
+from ..utils import es_dia_laboral
 
 
 @login_required
@@ -41,6 +42,11 @@ def api_horarios_disponibles(request):
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
     except:
         return JsonResponse({'error': 'Parámetros inválidos'}, status=400)
+    
+    # Validar que sea día laboral (no fin de semana ni feriado)
+    es_laboral, mensaje = es_dia_laboral(fecha)
+    if not es_laboral:
+        return JsonResponse({'error': mensaje}, status=400)
     
     # Obtener día de la semana (0=Lunes, 6=Domingo)
     dia_semana = fecha.weekday()

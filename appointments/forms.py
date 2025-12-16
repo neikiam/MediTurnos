@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Usuario, Paciente, Medico, Especialidad, Turno, HorarioAtencion
+from .utils import es_dia_laboral, es_feriado
 from datetime import datetime, time, date
 
 class RegistroPacienteForm(UserCreationForm):
@@ -152,6 +153,12 @@ class TurnoForm(forms.ModelForm):
         if fecha and fecha < datetime.now().date():
             raise forms.ValidationError('No se pueden crear turnos en fechas pasadas.')
         
+        # Validar que no sea feriado ni fin de semana
+        if fecha:
+            es_laboral, mensaje = es_dia_laboral(fecha)
+            if not es_laboral:
+                raise forms.ValidationError(mensaje)
+        
         # Validar conflicto de horarios
         if fecha and hora and medico:
             turno_existente = Turno.objects.filter(
@@ -187,10 +194,30 @@ class PacienteTurnoForm(forms.ModelForm):
         model = Turno
         fields = ['especialidad', 'medico', 'fecha', 'hora', 'motivo_consulta']
         widgets = {
-            'fecha': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'id': 'id_fecha'}),
+            'fecha': forms.DateInput(attrs={
+                'class': 'form-control', 
+                'type': 'date', 
+                'id': 'id_fecha',
+                'min': date.today().isoformat()
+            }),
             'hora': forms.Select(attrs={'class': 'form-control', 'id': 'id_hora'}),
             'motivo_consulta': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Opcional'}),
         }
+    
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+        
+        if fecha:
+            # Validar que no sea fecha pasada
+            if fecha < datetime.now().date():
+                raise forms.ValidationError('No se pueden solicitar turnos en fechas pasadas.')
+            
+            # Validar que no sea feriado ni fin de semana
+            es_laboral, mensaje = es_dia_laboral(fecha)
+            if not es_laboral:
+                raise forms.ValidationError(mensaje)
+        
+        return fecha
 
 
 class AtenderTurnoForm(forms.ModelForm):
