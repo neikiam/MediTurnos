@@ -108,6 +108,35 @@
         </div>
     </div>
     
+    <!-- Gráficos de Estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-graph-up text-primary"></i> Turnos por Día (Última Semana)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="turnosChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-pie-chart text-success"></i> Estados de Turnos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="estadosChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Accesos rápidos -->
     <div class="row g-4 mb-4">
         <div class="col-md-6">
@@ -190,4 +219,134 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración común de Chart.js
+    Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+    Chart.defaults.color = '#2c3e50';
+    
+    // Gráfico de Turnos por Día
+    const ctxTurnos = document.getElementById('turnosChart');
+    if (ctxTurnos) {
+        // Datos de ejemplo - en producción vendrían del backend
+        const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const turnosPorDia = [12, 19, 15, 25, 22, 8, 5];
+        
+        new Chart(ctxTurnos, {
+            type: 'line',
+            data: {
+                labels: diasSemana,
+                datasets: [{
+                    label: 'Turnos',
+                    data: turnosPorDia,
+                    borderColor: '#2d6a7a',
+                    backgroundColor: 'rgba(45, 106, 122, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#2d6a7a',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 5
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Gráfico de Estados
+    const ctxEstados = document.getElementById('estadosChart');
+    if (ctxEstados) {
+        new Chart(ctxEstados, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pendientes', 'Confirmados', 'Atendidos', 'Cancelados'],
+                datasets: [{
+                    data: [{{ turnos_pendientes }}, 15, {{ turnos_atendidos }}, 8],
+                    backgroundColor: [
+                        '#f59e0b',  // Pendiente - amarillo
+                        '#3b82f6',  // Confirmado - azul
+                        '#22c55e',  // Atendido - verde
+                        '#ef4444'   // Cancelado - rojo
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

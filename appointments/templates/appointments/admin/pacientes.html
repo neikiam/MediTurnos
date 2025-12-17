@@ -19,10 +19,23 @@
         </div>
     </div>
     
+    <!-- Barra de búsqueda -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" 
+                       id="searchPacientes" 
+                       class="form-control" 
+                       placeholder="Buscar por nombre, DNI, email o teléfono...">
+            </div>
+        </div>
+    </div>
+    
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="tablaPacientes">
                     <thead class="table-light">
                         <tr>
                             <th>Nombre Completo</th>
@@ -61,4 +74,11 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    // Inicializar búsqueda en tabla
+    setupTableSearch('searchPacientes', 'tablaPacientes', [0, 1, 2, 3, 4]);
+</script>
+{% endblock %}
 {% endblock %}
