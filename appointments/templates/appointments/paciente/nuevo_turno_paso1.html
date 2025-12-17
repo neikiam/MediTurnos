@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Solicitar Turno - Paso 1 - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-calendar-plus text-primary"></i> Solicitar Nuevo Turno
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'paciente_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Nuevo Turno</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Indicador de pasos -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="text-center mx-3">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <strong>1</strong>
+                    </div>
+                    <div class="mt-2"><strong>Especialidad y Horario</strong></div>
+                </div>
+                <div class="flex-grow-1" style="height: 2px; background-color: #dee2e6; max-width: 100px;"></div>
+                <div class="text-center mx-3">
+                    <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <strong>2</strong>
+                    </div>
+                    <div class="mt-2 text-muted">Médico y Motivo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-4">
+                        <i class="bi bi-1-circle-fill text-primary"></i> Paso 1: ¿Qué especialidad necesitas y cuándo?
+                    </h5>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Selecciona la especialidad médica, la fecha y el horario que prefieres. En el siguiente paso podrás elegir el médico.
+                    </div>
+                    
+                    <form method="post" id="paso1Form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="id_especialidad" class="form-label fw-bold">
+                                <i class="bi bi-heart-pulse"></i> Especialidad Médica
+                            </label>
+                            <select name="especialidad" class="form-select form-select-lg" id="id_especialidad" required>
+                                <option value="">-- Seleccione una especialidad --</option>
+                                {% for especialidad in especialidades %}
+                                    <option value="{{ especialidad.id }}">{{ especialidad.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_fecha" class="form-label fw-bold">
+                                <i class="bi bi-calendar-event"></i> Fecha
+                            </label>
+                            <input type="date" name="fecha" class="form-control form-control-lg" id="id_fecha" 
+                                   min="{{ fecha_minima }}" required>
+                            <small class="form-text text-muted">Solo días laborales</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_hora" class="form-label fw-bold">
+                                <i class="bi bi-clock"></i> Horario Disponible
+                            </label>
+                            <select name="hora" class="form-select form-select-lg" id="id_hora" required disabled>
+                                <option value="">Primero seleccione especialidad y fecha</option>
+                            </select>
+                            <small class="form-text text-muted">Horarios con médicos disponibles</small>
+                        </div>
+                        
+                        <div id="loading" class="alert alert-warning d-none">
+                            <i class="bi bi-hourglass-split"></i> Cargando horarios disponibles...
+                        </div>
+                        
+                        <div class="d-flex gap-2 justify-content-between mt-4">
+                            <a href="{% url 'paciente_dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                Siguiente <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm mt-4 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-lightbulb text-warning"></i> Consejos
+                    </h6>
+                    <ul class="small mb-0">
+                        <li>Los turnos quedan como "pendientes" hasta que el administrador los valide</li>
+                        <li>Recibirás notificación cuando tu turno sea validado</li>
+                        <li>Solo se muestran horarios donde hay médicos disponibles</li>
+                        <li>Podés cancelar tu turno hasta 2 horas antes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    function cargarHorarios() {
+        var especialidadId = $('#id_especialidad').val();
+        var fecha = $('#id_fecha').val();
+        
+        if (especialidadId && fecha) {
+            $('#loading').removeClass('d-none');
+            $('#id_hora').prop('disabled', true).html('<option value="">Cargando...</option>');
+            $('#submitBtn').prop('disabled', true);
+            
+            $.ajax({
+                url: '/api/horarios-disponibles-especialidad/',
+                data: {
+                    'especialidad_id': especialidadId,
+                    'fecha': fecha
+                },
+                success: function(data) {
+                    $('#loading').addClass('d-none');
+                    $('#id_hora').prop('disabled', false);
+                    
+                    if (Array.isArray(data) && data.length > 0) {
+                        var options = '<option value="">-- Seleccione un horario --</option>';
+                        $.each(data, function(i, slot) {
+                            options += '<option value="' + slot.hora + '">' + slot.hora + '</option>';
+                        });
+                        $('#id_hora').html(options);
+                    } else {
+                        $('#id_hora').html('<option value="">No hay horarios disponibles en esta fecha</option>');
+                    }
+                },
+                error: function(xhr) {
+                    $('#loading').addClass('d-none');
+                    $('#id_hora').prop('disabled', false);
+                    
+                    var errorMsg = 'Error al cargar horarios';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    }
+                    
+                    $('#id_hora').html('<option value="">' + errorMsg + '</option>');
+                    alert(errorMsg);
+                }
+            });
+        }
+    }
+    
+    $('#id_especialidad, #id_fecha').change(cargarHorarios);
+    
+    $('#id_hora').change(function() {
+        if ($(this).val()) {
+            $('#submitBtn').prop('disabled', false);
+        } else {
+            $('#submitBtn').prop('disabled', true);
+        }
+    });
+});
+</script>
+{% endblock %}

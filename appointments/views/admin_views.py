@@ -33,7 +33,13 @@ def admin_dashboard(request):
     hoy = timezone.now().date()
     turnos_hoy = Turno.objects.filter(fecha=hoy).count()
     turnos_pendientes = Turno.objects.filter(fecha=hoy, estado='pendiente').count()
+    turnos_activos = Turno.objects.filter(fecha=hoy, estado='activo').count()
     turnos_atendidos = Turno.objects.filter(fecha=hoy, estado='atendido').count()
+    
+    # Turnos pendientes de validación (global)
+    turnos_pendientes_validacion = Turno.objects.filter(estado='pendiente').select_related(
+        'paciente__usuario', 'medico__usuario', 'especialidad'
+    ).order_by('fecha', 'hora')[:10]
     
     # Últimos turnos
     ultimos_turnos = Turno.objects.select_related(
@@ -46,7 +52,9 @@ def admin_dashboard(request):
         'total_especialidades': total_especialidades,
         'turnos_hoy': turnos_hoy,
         'turnos_pendientes': turnos_pendientes,
+        'turnos_activos': turnos_activos,
         'turnos_atendidos': turnos_atendidos,
+        'turnos_pendientes_validacion': turnos_pendientes_validacion,
         'ultimos_turnos': ultimos_turnos,
     }
     return render(request, 'appointments/admin/dashboard.html', context)
@@ -413,6 +421,40 @@ def admin_turno_eliminar(request, pk):
         return redirect('admin_turnos')
     
     return render(request, 'appointments/admin/turno_eliminar.html', {'turno': turno})
+
+
+@login_required
+def admin_turno_validar(request, pk):
+    """Validar turno (cambiar de pendiente a activo)"""
+    if request.user.rol != 'admin':
+        messages.error(request, 'No tienes permisos.')
+        return redirect('dashboard')
+    
+    turno = get_object_or_404(Turno, pk=pk)
+    
+    if turno.estado != 'pendiente':
+        messages.warning(request, 'Este turno no está pendiente de validación.')
+        return redirect('admin_turnos')
+    
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        
+        if accion == 'validar':
+            # Verificar que no haya sobreposición
+            if turno.tiene_sobreposicion():
+                messages.error(request, 'No se puede validar este turno porque ya existe otro turno activo en el mismo horario para este médico.')
+            else:
+                turno.estado = 'activo'
+                turno.save()
+                messages.success(request, f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.')
+        elif accion == 'rechazar':
+            turno.estado = 'rechazado'
+            turno.save()
+            messages.success(request, 'Turno rechazado correctamente.')
+        
+        return redirect('admin_turnos')
+    
+    return render(request, 'appointments/admin/turno_validar.html', {'turno': turno})
 
 
 # --- Estadísticas ---

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Solicitar Turno - Paso 2 - MediTurnos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-calendar-plus text-primary"></i> Solicitar Nuevo Turno
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'paciente_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'paciente_nuevo_turno_paso1' %}">Nuevo Turno</a></li>
+                    <li class="breadcrumb-item active">Paso 2</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Indicador de pasos -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="text-center mx-3">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <div class="mt-2 text-success"><strong>Especialidad y Horario</strong></div>
+                </div>
+                <div class="flex-grow-1" style="height: 2px; background-color: #28a745; max-width: 100px;"></div>
+                <div class="text-center mx-3">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <strong>2</strong>
+                    </div>
+                    <div class="mt-2"><strong>Médico y Motivo</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Resumen del Paso 1 -->
+            <div class="card border-0 shadow-sm mb-4 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle text-primary"></i> Turno Solicitado
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Especialidad:</strong><br>
+                            {{ especialidad.nombre }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Fecha:</strong><br>
+                            {{ fecha|date:"d/m/Y" }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Horario:</strong><br>
+                            {{ hora|time:"H:i" }}
+                        </div>
+                    </div>
+                    <a href="{% url 'paciente_nuevo_turno_paso1' %}" class="btn btn-sm btn-outline-secondary mt-2">
+                        <i class="bi bi-arrow-left"></i> Cambiar horario
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-4">
+                        <i class="bi bi-2-circle-fill text-primary"></i> Paso 2: Elige tu médico
+                    </h5>
+                    
+                    {% if medicos_disponibles %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Hay <strong>{{ medicos_disponibles|length }}</strong> médico{{ medicos_disponibles|length|pluralize }} disponible{{ medicos_disponibles|length|pluralize }} en este horario
+                        </div>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-person-badge"></i> Selecciona un Médico
+                                </label>
+                                
+                                <div class="list-group">
+                                    {% for medico in medicos_disponibles %}
+                                        <label class="list-group-item list-group-item-action d-flex align-items-center" style="cursor: pointer;">
+                                            <input type="radio" name="medico" value="{{ medico.id }}" class="form-check-input me-3" required>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                                    <h6 class="mb-1">{{ medico }}</h6>
+                                                    {% if medico.foto %}
+                                                        <img src="{{ medico.foto.url }}" class="rounded-circle" width="50" height="50" alt="{{ medico }}">
+                                                    {% endif %}
+                                                </div>
+                                                <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-envelope"></i> {{ medico.usuario.email }}
+                                                </p>
+                                                <p class="mb-0 small">
+                                                    <strong>Especialidad{{ medico.especialidades.all|length|pluralize:"es" }}:</strong> 
+                                                    {{ medico.get_especialidades_str }}
+                                                </p>
+                                                {% if medico.biografia %}
+                                                    <p class="mb-0 small text-muted mt-1">{{ medico.biografia|truncatewords:20 }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="id_motivo_consulta" class="form-label fw-bold">
+                                    <i class="bi bi-chat-left-text"></i> Motivo de Consulta <span class="text-muted fw-normal">(Opcional)</span>
+                                </label>
+                                <textarea name="motivo_consulta" class="form-control" id="id_motivo_consulta" rows="4" 
+                                          placeholder="Describe brevemente el motivo de tu consulta (opcional)..."></textarea>
+                                <small class="form-text text-muted">Esta información ayudará al médico a prepararse para la consulta</small>
+                            </div>
+                            
+                            <div class="d-flex gap-2 justify-content-between mt-4">
+                                <a href="{% url 'paciente_nuevo_turno_paso1' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Volver
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-circle"></i> Confirmar Turno
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            <strong>No hay médicos disponibles</strong> para la especialidad <strong>{{ especialidad.nombre }}</strong> 
+                            el día <strong>{{ fecha|date:"d/m/Y" }}</strong> a las <strong>{{ hora|time:"H:i" }}</strong>.
+                        </div>
+                        
+                        <p>Esto puede deberse a que:</p>
+                        <ul>
+                            <li>Todos los médicos ya tienen turnos en ese horario</li>
+                            <li>Ningún médico tiene horario de atención en ese momento</li>
+                        </ul>
+                        
+                        <a href="{% url 'paciente_nuevo_turno_paso1' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Elegir otro horario
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

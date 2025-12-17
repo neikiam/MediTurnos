@@ -21,17 +21,18 @@ def medico_dashboard(request):
     medico = request.user.perfil_medico
     hoy = timezone.now().date()
     
-    # Turnos de hoy
+    # Turnos de hoy (solo activos y en proceso)
     turnos_hoy = Turno.objects.filter(
         medico=medico,
-        fecha=hoy
+        fecha=hoy,
+        estado__in=['activo', 'en_atencion', 'atendido']
     ).select_related('paciente__usuario', 'especialidad').order_by('hora')
     
-    # Próximos turnos
+    # Próximos turnos (solo activos)
     proximos_turnos = Turno.objects.filter(
         medico=medico,
         fecha__gt=hoy,
-        estado__in=['pendiente', 'confirmado']
+        estado='activo'
     ).select_related('paciente__usuario', 'especialidad').order_by('fecha', 'hora')[:5]
     
     # Estadísticas
@@ -77,10 +78,11 @@ def medico_agenda(request):
     else:
         fecha = timezone.now().date()
     
-    # Turnos del día seleccionado
+    # Turnos del día seleccionado (solo activos y en proceso)
     turnos = Turno.objects.filter(
         medico=medico,
-        fecha=fecha
+        fecha=fecha,
+        estado__in=['activo', 'en_atencion', 'atendido', 'ausente']
     ).select_related('paciente__usuario', 'especialidad').order_by('hora')
     
     context = {

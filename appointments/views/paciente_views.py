@@ -20,11 +20,11 @@ def paciente_dashboard(request):
     paciente = request.user.perfil_paciente
     hoy = timezone.now().date()
     
-    # Próximos turnos
+    # Próximos turnos (activos y pendientes)
     proximos_turnos = Turno.objects.filter(
         paciente=paciente,
         fecha__gte=hoy,
-        estado__in=['pendiente', 'confirmado']
+        estado__in=['pendiente', 'activo']
     ).select_related('medico__usuario', 'especialidad').order_by('fecha', 'hora')[:5]
     
     # Historial de turnos

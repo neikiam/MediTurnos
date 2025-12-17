@@ -52,7 +52,6 @@ class Usuario(AbstractUser):
 class Especialidad(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True)
-    duracion_turno = models.IntegerField(default=30, help_text="Duración en minutos")
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     
@@ -142,13 +141,14 @@ class Paciente(models.Model):
 # Modelo de Turno
 class Turno(models.Model):
     ESTADOS = (
-        ('pendiente', 'Pendiente'),
-        ('confirmado', 'Confirmado'),
+        ('pendiente', 'Pendiente de Validación'),
+        ('activo', 'Activo'),
         ('en_atencion', 'En Atención'),
         ('atendido', 'Atendido'),
         ('cancelado_paciente', 'Cancelado por Paciente'),
         ('cancelado_medico', 'Cancelado por Médico'),
         ('ausente', 'Ausente'),
+        ('rechazado', 'Rechazado'),
     )
     
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='turnos')
@@ -174,18 +174,19 @@ class Turno(models.Model):
     def get_estado_color(self):
         colores = {
             'pendiente': 'warning',
-            'confirmado': 'info',
+            'activo': 'success',
             'en_atencion': 'primary',
-            'atendido': 'success',
+            'atendido': 'info',
             'cancelado_paciente': 'secondary',
             'cancelado_medico': 'danger',
             'ausente': 'dark',
+            'rechazado': 'danger',
         }
         return colores.get(self.estado, 'secondary')
     
     def puede_cancelar(self):
         """Verifica si el turno puede ser cancelado"""
-        if self.estado in ['atendido', 'cancelado_paciente', 'cancelado_medico', 'ausente']:
+        if self.estado in ['atendido', 'cancelado_paciente', 'cancelado_medico', 'ausente', 'rechazado']:
             return False
         # No permitir cancelar turnos con menos de 2 horas de anticipación
         ahora = timezone.now()
@@ -193,6 +194,23 @@ class Turno(models.Model):
             timezone.datetime.combine(self.fecha, self.hora)
         )
         return turno_datetime > ahora + timezone.timedelta(hours=2)
+    
+    def puede_activar(self):
+        """Verifica si el turno puede ser activado (validado)"""
+        if self.estado != 'pendiente':
+            return False
+        # Verificar que no haya otro turno activo en el mismo horario
+        return not self.tiene_sobreposicion()
+    
+    def tiene_sobreposicion(self):
+        """Verifica si hay otro turno activo en el mismo horario para el médico"""
+        turnos_conflicto = Turno.objects.filter(
+            medico=self.medico,
+            fecha=self.fecha,
+            hora=self.hora,
+            estado__in=['activo', 'en_atencion']
+        ).exclude(pk=self.pk if self.pk else None)
+        return turnos_conflicto.exists()
 
 
 # Modelo de Configuración del Sistema
