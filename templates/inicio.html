@@ -8,13 +8,13 @@
 <section class="hero-section bg-gradient-primary text-white">
     <div class="container py-5">
         <div class="row align-items-center min-vh-50">
-            <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="col-12 text-center">
                 <h1 class="display-3 fw-bold mb-4">Sistema de Turnos Médicos Profesional</h1>
                 <p class="lead mb-4">
                     Gestiona tus consultas médicas de forma rápida, segura y eficiente. 
                     Atención de calidad al alcance de un clic.
                 </p>
-                <div class="d-flex gap-3 flex-wrap">
+                <div class="d-flex gap-3 flex-wrap justify-content-center">
                     {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-4">
                         <i class="bi bi-speedometer2"></i> Ir al Panel
@@ -27,11 +27,6 @@
                         <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                     </a>
                     {% endif %}
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="hero-image">
-                    <i class="bi bi-hospital display-1 text-white opacity-75"></i>
                 </div>
             </div>
         </div>
