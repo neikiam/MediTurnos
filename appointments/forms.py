@@ -101,6 +101,18 @@ class MedicoForm(forms.ModelForm):
         }
 
 
+class AsignarMedicoRolForm(forms.ModelForm):
+    """Formulario simplificado para asignar rol de médico (sin biografía ni foto)"""
+    class Meta:
+        model = Medico
+        fields = ['especialidades', 'matricula', 'activo']
+        widgets = {
+            'especialidades': forms.CheckboxSelectMultiple(),
+            'matricula': forms.TextInput(attrs={'class': 'form-control'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
 class AsignarMedicoForm(forms.Form):
     """Formulario para buscar y asignar rol de médico a usuario existente"""
     buscar = forms.CharField(

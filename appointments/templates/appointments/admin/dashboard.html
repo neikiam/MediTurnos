@@ -17,65 +17,41 @@
     <!-- Estadísticas principales -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-uppercase opacity-75 mb-2">Pacientes</h6>
-                            <h2 class="fw-bold mb-0">{{ total_pacientes }}</h2>
-                        </div>
-                        <div class="bg-white bg-opacity-25 rounded p-3">
-                            <i class="bi bi-people" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+            <div class="stat-card bg-primary text-white">
+                <i class="bi bi-people"></i>
+                <div>
+                    <h3>{{ total_pacientes }}</h3>
+                    <p>Pacientes</p>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-uppercase opacity-75 mb-2">Médicos</h6>
-                            <h2 class="fw-bold mb-0">{{ total_medicos }}</h2>
-                        </div>
-                        <div class="bg-white bg-opacity-25 rounded p-3">
-                            <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+            <div class="stat-card bg-success text-white">
+                <i class="bi bi-person-badge"></i>
+                <div>
+                    <h3>{{ total_medicos }}</h3>
+                    <p>Médicos</p>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-uppercase opacity-75 mb-2">Especialidades</h6>
-                            <h2 class="fw-bold mb-0">{{ total_especialidades }}</h2>
-                        </div>
-                        <div class="bg-white bg-opacity-25 rounded p-3">
-                            <i class="bi bi-heart-pulse" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+            <div class="stat-card bg-info text-white">
+                <i class="bi bi-heart-pulse"></i>
+                <div>
+                    <h3>{{ total_especialidades }}</h3>
+                    <p>Especialidades</p>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100 bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-uppercase opacity-75 mb-2">Turnos Hoy</h6>
-                            <h2 class="fw-bold mb-0">{{ turnos_hoy }}</h2>
-                        </div>
-                        <div class="bg-white bg-opacity-25 rounded p-3">
-                            <i class="bi bi-calendar-check" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+            <div class="stat-card bg-warning text-white">
+                <i class="bi bi-calendar-check"></i>
+                <div>
+                    <h3>{{ turnos_hoy }}</h3>
+                    <p>Turnos Hoy</p>
                 </div>
             </div>
         </div>
@@ -87,28 +63,12 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-warning bg-opacity-10 rounded p-3">
-                            <i class="bi bi-clock text-warning" style="font-size: 1.5rem;"></i>
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clock"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Pendientes</h6>
-                            <h4 class="fw-bold mb-0">{{ turnos_pendientes }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-success bg-opacity-10 rounded p-3">
-                            <i class="bi bi-check-circle text-success" style="font-size: 1.5rem;"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Atendidos</h6>
-                            <h4 class="fw-bold mb-0">{{ turnos_atendidos }}</h4>
+                        <div class="flex-grow-1">
+                            <h6>Pendientes</h6>
+                            <h4>{{ turnos_pendientes }}</h4>
                         </div>
                     </div>
                 </div>
@@ -119,12 +79,28 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded p-3">
-                            <i class="bi bi-graph-up text-primary" style="font-size: 1.5rem;"></i>
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Hoy</h6>
-                            <h4 class="fw-bold mb-0">{{ turnos_hoy }}</h4>
+                        <div class="flex-grow-1">
+                            <h6>Atendidos</h6>
+                            <h4>{{ turnos_atendidos }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6>Total Hoy</h6>
+                            <h4>{{ turnos_hoy }}</h4>
                         </div>
                     </div>
                 </div>

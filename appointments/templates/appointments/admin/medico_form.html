@@ -77,7 +77,7 @@
                     <hr class="my-4">
                     
                     <!-- Formulario de Asignación -->
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post">
                         {% csrf_token %}
                         
                         <h6 class="fw-bold mb-3 text-primary">
@@ -127,30 +127,6 @@
                             {% if medico_form.especialidades.errors %}
                                 <div class="text-danger mt-1">
                                     {{ medico_form.especialidades.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ medico_form.biografia.id_for_label }}" class="form-label">
-                                {{ medico_form.biografia.label }}
-                            </label>
-                            {{ medico_form.biografia }}
-                            {% if medico_form.biografia.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ medico_form.biografia.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ medico_form.foto.id_for_label }}" class="form-label">
-                                {{ medico_form.foto.label }}
-                            </label>
-                            {{ medico_form.foto }}
-                            {% if medico_form.foto.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ medico_form.foto.errors }}
                                 </div>
                             {% endif %}
                         </div>

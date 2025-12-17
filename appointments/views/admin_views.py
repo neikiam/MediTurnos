@@ -14,7 +14,7 @@ from ..models import (
 )
 from ..forms import (
     EspecialidadForm, MedicoUsuarioForm, MedicoForm,
-    HorarioAtencionForm, TurnoForm, AsignarMedicoForm
+    HorarioAtencionForm, TurnoForm, AsignarMedicoForm, AsignarMedicoRolForm
 )
 
 @login_required
@@ -148,13 +148,13 @@ def admin_medico_crear(request):
     
     if request.method == 'POST':
         asignar_form = AsignarMedicoForm(request.POST, busqueda=busqueda)
-        medico_form = MedicoForm(request.POST, request.FILES)
+        medico_form = AsignarMedicoRolForm(request.POST)
         
         if 'buscar_usuarios' in request.POST:
             # Solo buscar usuarios
             busqueda = request.POST.get('buscar', '')
             asignar_form = AsignarMedicoForm(busqueda=busqueda)
-            medico_form = MedicoForm()
+            medico_form = AsignarMedicoRolForm()
             
         elif asignar_form.is_valid() and medico_form.is_valid():
             usuario = asignar_form.cleaned_data.get('usuario')
@@ -180,7 +180,7 @@ def admin_medico_crear(request):
                     return redirect('admin_medicos')
     else:
         asignar_form = AsignarMedicoForm(busqueda=busqueda)
-        medico_form = MedicoForm()
+        medico_form = AsignarMedicoRolForm()
     
     # Obtener usuarios disponibles para mostrar en la búsqueda
     if busqueda:
