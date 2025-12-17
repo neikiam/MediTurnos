@@ -152,7 +152,7 @@ class Turno(models.Model):
     )
     
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='turnos')
-    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='turnos')
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='turnos', null=True, blank=True)
     especialidad = models.ForeignKey(Especialidad, on_delete=models.CASCADE)
     fecha = models.DateField()
     hora = models.TimeField()
@@ -166,7 +166,8 @@ class Turno(models.Model):
         verbose_name = 'Turno'
         verbose_name_plural = 'Turnos'
         ordering = ['-fecha', '-hora']
-        unique_together = ['medico', 'fecha', 'hora']
+        # No usar unique_together para permitir múltiples solicitudes pendientes
+        # La validación se hace en el formulario y al activar turnos
     
     def __str__(self):
         return f"{self.paciente} - {self.medico} - {self.fecha} {self.hora}"
@@ -183,6 +184,20 @@ class Turno(models.Model):
             'rechazado': 'danger',
         }
         return colores.get(self.estado, 'secondary')
+    
+    def get_estado_badge_class(self):
+        """Retorna la clase CSS personalizada para el badge del estado"""
+        clases = {
+            'pendiente': 'badge-pendiente',
+            'activo': 'badge-confirmado',
+            'en_atencion': 'badge-confirmado',
+            'atendido': 'badge-atendido',
+            'cancelado_paciente': 'badge-cancelado',
+            'cancelado_medico': 'badge-cancelado',
+            'ausente': 'badge-ausente',
+            'rechazado': 'badge-rechazado',
+        }
+        return clases.get(self.estado, 'badge-estado')
     
     def puede_cancelar(self):
         """Verifica si el turno puede ser cancelado"""
@@ -211,6 +226,19 @@ class Turno(models.Model):
             estado__in=['activo', 'en_atencion']
         ).exclude(pk=self.pk if self.pk else None)
         return turnos_conflicto.exists()
+    
+    def rechazar_turnos_pendientes_conflictivos(self):
+        """Rechaza automáticamente todos los turnos pendientes que coincidan con este turno"""
+        turnos_a_rechazar = Turno.objects.filter(
+            medico=self.medico,
+            fecha=self.fecha,
+            hora=self.hora,
+            estado='pendiente'
+        ).exclude(pk=self.pk)
+        
+        cantidad = turnos_a_rechazar.count()
+        turnos_a_rechazar.update(estado='rechazado')
+        return cantidad
 
 
 # Modelo de Configuración del Sistema

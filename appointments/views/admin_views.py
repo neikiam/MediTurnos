@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from ..models import (
     Usuario, Paciente, Medico, Especialidad, Turno,
@@ -17,7 +17,8 @@ from ..models import (
 )
 from ..forms import (
     EspecialidadForm, MedicoUsuarioForm, MedicoForm,
-    HorarioAtencionForm, TurnoForm, AsignarMedicoForm, AsignarMedicoRolForm
+    HorarioAtencionForm, TurnoForm, AsignarMedicoForm, AsignarMedicoRolForm,
+    AtenderTurnoForm, PerfilPacienteForm, PacienteTurnoForm
 )
 
 @login_required
@@ -158,21 +159,17 @@ def admin_medico_crear(request):
     usuarios_encontrados = []
     
     if request.method == 'POST':
-        asignar_form = AsignarMedicoForm(request.POST, busqueda=busqueda)
         medico_form = AsignarMedicoRolForm(request.POST)
         
-        if 'buscar_usuarios' in request.POST:
-            # Solo buscar usuarios
-            busqueda = request.POST.get('buscar', '')
-            asignar_form = AsignarMedicoForm(busqueda=busqueda)
-            medico_form = AsignarMedicoRolForm()
-            
-        elif asignar_form.is_valid() and medico_form.is_valid():
-            usuario = asignar_form.cleaned_data.get('usuario')
-            
-            if not usuario:
-                messages.error(request, 'Debe seleccionar un usuario.')
-            else:
+        # Obtener el ID del usuario desde el campo oculto
+        usuario_id = request.POST.get('usuario_id')
+        
+        if not usuario_id:
+            messages.error(request, 'Debe seleccionar un usuario.')
+        elif medico_form.is_valid():
+            try:
+                usuario = Usuario.objects.get(pk=usuario_id, rol='paciente')
+                
                 # Verificar que el usuario no sea ya médico
                 if hasattr(usuario, 'medico'):
                     messages.error(request, f'{usuario.get_full_name()} ya es médico.')
@@ -189,8 +186,9 @@ def admin_medico_crear(request):
                     
                     messages.success(request, f'{usuario.get_full_name()} ahora es médico.')
                     return redirect('admin_medicos')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Usuario no encontrado o no disponible.')
     else:
-        asignar_form = AsignarMedicoForm(busqueda=busqueda)
         medico_form = AsignarMedicoRolForm()
     
     # Obtener usuarios disponibles para mostrar en la búsqueda
@@ -205,7 +203,6 @@ def admin_medico_crear(request):
         )[:10]  # Limitar a 10 resultados
     
     context = {
-        'asignar_form': asignar_form,
         'medico_form': medico_form,
         'accion': 'Asignar Médico',
         'busqueda': busqueda,
@@ -443,21 +440,57 @@ def admin_turno_validar(request, pk):
         accion = request.POST.get('accion')
         
         if accion == 'validar':
-            # Verificar que no haya sobreposición
+            # Verificar que tenga médico asignado
+            if not turno.medico:
+                messages.error(request, 'No se puede validar este turno sin un médico asignado. Por favor, asigne un médico primero.')
+                return redirect('admin_turno_validar', pk=pk)
+            
+            # Verificar que no haya sobreposición con turnos activos
             if turno.tiene_sobreposicion():
                 messages.error(request, 'No se puede validar este turno porque ya existe otro turno activo en el mismo horario para este médico.')
             else:
                 turno.estado = 'activo'
                 turno.save()
-                messages.success(request, f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.')
+                
+                # Rechazar automáticamente otros turnos pendientes en el mismo horario
+                cantidad_rechazados = turno.rechazar_turnos_pendientes_conflictivos()
+                
+                mensaje = f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.'
+                if cantidad_rechazados > 0:
+                    mensaje += f' Se rechazaron automáticamente {cantidad_rechazados} solicitud(es) pendiente(s) para el mismo horario.'
+                messages.success(request, mensaje)
+                return redirect('admin_turnos')
         elif accion == 'rechazar':
             turno.estado = 'rechazado'
             turno.save()
             messages.success(request, 'Turno rechazado correctamente.')
-        
-        return redirect('admin_turnos')
+            return redirect('admin_turnos')
+        elif accion == 'asignar_medico':
+            # Asignar médico al turno
+            medico_id = request.POST.get('medico_id')
+            if medico_id:
+                try:
+                    medico = Medico.objects.get(pk=medico_id, activo=True)
+                    turno.medico = medico
+                    turno.save()
+                    messages.success(request, f'Médico {medico} asignado correctamente al turno.')
+                except Medico.DoesNotExist:
+                    messages.error(request, 'El médico seleccionado no existe o no está activo.')
+            else:
+                messages.error(request, 'Debe seleccionar un médico.')
+            return redirect('admin_turno_validar', pk=pk)
     
-    return render(request, 'appointments/admin/turno_validar.html', {'turno': turno})
+    # Obtener médicos disponibles para esa especialidad
+    medicos_disponibles = Medico.objects.filter(
+        especialidades=turno.especialidad,
+        activo=True
+    ).select_related('usuario')
+    
+    context = {
+        'turno': turno,
+        'medicos_disponibles': medicos_disponibles,
+    }
+    return render(request, 'appointments/admin/turno_validar.html', context)
 
 
 @login_required
@@ -489,9 +522,17 @@ def admin_turno_cambiar_estado(request, pk):
             
             turno.estado = 'activo'
             turno.save()
+            
+            # Rechazar automáticamente otros turnos pendientes en el mismo horario
+            cantidad_rechazados = turno.rechazar_turnos_pendientes_conflictivos()
+            
+            mensaje = f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.'
+            if cantidad_rechazados > 0:
+                mensaje += f' Se rechazaron automáticamente {cantidad_rechazados} solicitud(es) pendiente(s).'
+            
             return JsonResponse({
                 'success': True,
-                'message': f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.'
+                'message': mensaje
             })
             
         elif nuevo_estado == 'rechazado':

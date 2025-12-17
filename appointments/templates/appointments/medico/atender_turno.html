@@ -53,7 +53,7 @@
                     
                     <div class="mb-3">
                         <small class="text-muted">Estado Actual</small>
-                        <p><span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span></p>
+                        <p><span class="badge-estado {{ turno.get_estado_badge_class }}">{{ turno.get_estado_display }}</span></p>
                     </div>
                     
                     {% if turno.motivo_consulta %}

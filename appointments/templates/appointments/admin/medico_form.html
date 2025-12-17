@@ -41,23 +41,38 @@
                             <div class="mt-3">
                                 <h6 class="text-muted mb-2">Resultados de búsqueda:</h6>
                                 {% if usuarios_encontrados %}
-                                    <div class="list-group">
+                                    <div class="row g-3">
                                         {% for usuario in usuarios_encontrados %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">{{ usuario.get_full_name }}</h6>
-                                                    <small class="text-muted">
-                                                        Email: {{ usuario.email }} | DNI: {{ usuario.dni }} | Usuario: {{ usuario.username }}
-                                                    </small>
+                                        <div class="col-md-6">
+                                            <div class="card h-100 shadow-sm border-primary" style="transition: all 0.2s;">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ usuario.get_full_name }}</h6>
+                                                        <span class="badge bg-info">{{ usuario.get_rol_display }}</span>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <small class="text-muted d-block">
+                                                            <i class="bi bi-envelope"></i> {{ usuario.email }}
+                                                        </small>
+                                                        <small class="text-muted d-block">
+                                                            <i class="bi bi-card-text"></i> DNI: {{ usuario.dni }}
+                                                        </small>
+                                                        <small class="text-muted d-block">
+                                                            <i class="bi bi-person"></i> Usuario: {{ usuario.username }}
+                                                        </small>
+                                                    </div>
+                                                    <button type="button" 
+                                                            class="btn btn-primary btn-sm w-100"
+                                                            onclick="seleccionarUsuario({{ usuario.id }}, '{{ usuario.get_full_name }}')">
+                                                        <i class="bi bi-check-circle"></i> Seleccionar
+                                                    </button>
                                                 </div>
-                                                <span class="badge bg-info">{{ usuario.get_rol_display }}</span>
                                             </div>
                                         </div>
                                         {% endfor %}
                                     </div>
-                                    <p class="text-muted mt-2 mb-0">
-                                        <small>Se encontraron {{ usuarios_encontrados|length }} usuario(s). Seleccione uno en el formulario abajo.</small>
+                                    <p class="text-muted mt-3 mb-0">
+                                        <small><i class="bi bi-info-circle"></i> Se encontraron {{ usuarios_encontrados|length }} usuario(s). Haga clic en "Seleccionar" para elegir uno.</small>
                                     </p>
                                 {% else %}
                                     <div class="alert alert-warning">
@@ -77,26 +92,29 @@
                     <hr class="my-4">
                     
                     <!-- Formulario de Asignación -->
-                    <form method="post">
+                    <form method="post" id="formAsignarMedico">
                         {% csrf_token %}
                         
+                        <!-- Campo oculto para el usuario seleccionado -->
+                        <input type="hidden" name="usuario_id" id="usuario_id" value="">
+                        
                         <h6 class="fw-bold mb-3 text-primary">
-                            <i class="bi bi-person-check"></i> Seleccionar Usuario
+                            <i class="bi bi-person-check"></i> Usuario Seleccionado
                         </h6>
                         
                         <div class="mb-3">
-                            <label for="{{ asignar_form.usuario.id_for_label }}" class="form-label">
-                                {{ asignar_form.usuario.label }}
-                            </label>
-                            {{ asignar_form.usuario }}
-                            {% if asignar_form.usuario.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ asignar_form.usuario.errors }}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">
-                                Seleccione el usuario de la lista. Si no aparece, use el buscador de arriba.
-                            </small>
+                            <div id="usuario-seleccionado-info" class="alert alert-info d-none">
+                                <i class="bi bi-person-check-fill"></i>
+                                <strong>Usuario seleccionado:</strong> <span id="nombre-usuario-seleccionado"></span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="limpiarSeleccion()">
+                                    <i class="bi bi-x"></i> Cambiar
+                                </button>
+                            </div>
+                            
+                            <div id="usuario-no-seleccionado" class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                No ha seleccionado ningún usuario. Use el buscador de arriba para encontrar y seleccionar un usuario.
+                            </div>
                         </div>
                         
                         <hr class="my-4">
@@ -144,7 +162,7 @@
                         </div>
                         
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" id="btnSubmit" class="btn btn-primary">
                                 <i class="bi bi-check-circle"></i> Asignar como Médico
                             </button>
                             <a href="{% url 'admin_medicos' %}" class="btn btn-secondary">
@@ -157,4 +175,42 @@
         </div>
     </div>
 </div>
+
+<script>
+function seleccionarUsuario(usuarioId, nombreUsuario) {
+    // Establecer el ID del usuario en el campo oculto
+    document.getElementById('usuario_id').value = usuarioId;
+    
+    // Mostrar información del usuario seleccionado
+    document.getElementById('nombre-usuario-seleccionado').textContent = nombreUsuario;
+    document.getElementById('usuario-seleccionado-info').classList.remove('d-none');
+    document.getElementById('usuario-no-seleccionado').classList.add('d-none');
+    
+    // Habilitar el botón de submit
+    document.getElementById('btnSubmit').disabled = false;
+    
+    // Scroll suave hacia el formulario
+    document.getElementById('formAsignarMedico').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function limpiarSeleccion() {
+    // Limpiar el campo oculto
+    document.getElementById('usuario_id').value = '';
+    
+    // Ocultar información del usuario seleccionado
+    document.getElementById('usuario-seleccionado-info').classList.add('d-none');
+    document.getElementById('usuario-no-seleccionado').classList.remove('d-none');
+    
+    // Deshabilitar el botón de submit
+    document.getElementById('btnSubmit').disabled = true;
+}
+
+// Al cargar la página, verificar si hay un usuario seleccionado
+document.addEventListener('DOMContentLoaded', function() {
+    const usuarioId = document.getElementById('usuario_id').value;
+    if (!usuarioId) {
+        document.getElementById('btnSubmit').disabled = true;
+    }
+});
+</script>
 {% endblock %}

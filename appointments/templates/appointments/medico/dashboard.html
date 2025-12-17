@@ -84,7 +84,7 @@
                                     </p>
                                 </div>
                                 <div class="col-auto">
-                                    <span class="badge bg-{{ turno.get_estado_color }} me-2">{{ turno.get_estado_display }}</span>
+                                    <span class="badge-estado {{ turno.get_estado_badge_class }} me-2">{{ turno.get_estado_display }}</span>
                                     {% if turno.estado not in 'atendido,cancelado_medico,cancelado_paciente,ausente' %}
                                         {% if turno.ya_paso %}
                                         <a href="{% url 'medico_atender_turno' turno.pk %}" class="btn btn-sm btn-primary">

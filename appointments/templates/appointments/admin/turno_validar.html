@@ -54,11 +54,18 @@
                         
                         <div class="col-md-6">
                             <h6 class="text-muted">MÉDICO</h6>
-                            <p class="mb-1"><strong>{{ turno.medico }}</strong></p>
-                            <p class="small mb-1">
-                                <i class="bi bi-briefcase"></i> {{ turno.especialidad.nombre }}<br>
-                                <i class="bi bi-envelope"></i> {{ turno.medico.usuario.email }}
-                            </p>
+                            {% if turno.medico %}
+                                <p class="mb-1"><strong>{{ turno.medico }}</strong></p>
+                                <p class="small mb-1">
+                                    <i class="bi bi-briefcase"></i> {{ turno.especialidad.nombre }}<br>
+                                    <i class="bi bi-envelope"></i> {{ turno.medico.usuario.email }}
+                                </p>
+                            {% else %}
+                                <div class="alert alert-warning mb-2">
+                                    <i class="bi bi-exclamation-triangle"></i> <strong>Sin médico asignado</strong>
+                                    <p class="small mb-0">Debe asignar un médico antes de validar este turno</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -79,7 +86,7 @@
                         <div class="col-md-4">
                             <h6 class="text-muted">ESTADO ACTUAL</h6>
                             <p class="mb-0">
-                                <span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span>
+                                <span class="badge-estado {{ turno.get_estado_badge_class }}">{{ turno.get_estado_display }}</span>
                             </p>
                         </div>
                     </div>
@@ -94,6 +101,34 @@
                     
                     <hr>
                     
+                    {% if not turno.medico %}
+                    <!-- Formulario para asignar médico -->
+                    <div class="alert alert-info mb-4">
+                        <h6><i class="bi bi-person-plus-fill"></i> Asignar Médico</h6>
+                        <p class="small mb-3">Seleccione un médico de la especialidad <strong>{{ turno.especialidad.nombre }}</strong> para este turno.</p>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row align-items-end">
+                                <div class="col-md-9">
+                                    <label for="medico_id" class="form-label">Médico</label>
+                                    <select name="medico_id" id="medico_id" class="form-control" required>
+                                        <option value="">-- Seleccione un médico --</option>
+                                        {% for medico in medicos_disponibles %}
+                                            <option value="{{ medico.id }}">{{ medico }} - {{ medico.usuario.email }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" name="accion" value="asignar_medico" class="btn btn-primary w-100">
+                                        <i class="bi bi-check"></i> Asignar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+                    
                     <form method="post">
                         {% csrf_token %}
                         
@@ -107,7 +142,8 @@
                                         onclick="return confirm('¿Está seguro de rechazar este turno?')">
                                     <i class="bi bi-x-circle"></i> Rechazar
                                 </button>
-                                <button type="submit" name="accion" value="validar" class="btn btn-success btn-lg">
+                                <button type="submit" name="accion" value="validar" class="btn btn-success btn-lg"
+                                        {% if not turno.medico %}disabled title="Debe asignar un médico primero"{% endif %}>
                                     <i class="bi bi-check-circle"></i> Validar Turno
                                 </button>
                             </div>

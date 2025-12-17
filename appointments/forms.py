@@ -238,13 +238,22 @@ class TurnoForm(forms.ModelForm):
             if not es_laboral:
                 raise forms.ValidationError(mensaje)
         
-        # Validar conflicto de horarios
+        # Validar conflicto de horarios (solo con turnos activos si es pendiente)
         if fecha and hora and medico:
+            estado_actual = cleaned_data.get('estado')
+            
+            # Si el turno es pendiente, solo validar contra activos/en_atencion
+            # Si el turno es activo, validar también contra pendientes
+            if estado_actual == 'pendiente':
+                estados_a_validar = ['activo', 'en_atencion']
+            else:
+                estados_a_validar = ['pendiente', 'activo', 'en_atencion']
+            
             turno_existente = Turno.objects.filter(
                 medico=medico,
                 fecha=fecha,
                 hora=hora,
-                estado__in=['pendiente', 'confirmado', 'en_atencion']
+                estado__in=estados_a_validar
             )
             
             # Si estamos editando, excluir el turno actual
@@ -252,7 +261,10 @@ class TurnoForm(forms.ModelForm):
                 turno_existente = turno_existente.exclude(pk=self.instance.pk)
             
             if turno_existente.exists():
-                raise forms.ValidationError('Ya existe un turno para este médico en ese horario.')
+                if estado_actual == 'pendiente':
+                    raise forms.ValidationError('Ya existe un turno activo para este médico en ese horario.')
+                else:
+                    raise forms.ValidationError('Ya existe un turno para este médico en ese horario.')
         
         return cleaned_data
 
@@ -308,6 +320,29 @@ class PacienteTurnoForm(forms.ModelForm):
                 raise forms.ValidationError(mensaje)
         
         return fecha
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha = cleaned_data.get('fecha')
+        hora = cleaned_data.get('hora')
+        medico = cleaned_data.get('medico')
+        
+        # Validar que NO haya turnos activos (pero permitir pendientes)
+        if fecha and hora and medico:
+            turno_activo_existente = Turno.objects.filter(
+                medico=medico,
+                fecha=fecha,
+                hora=hora,
+                estado__in=['activo', 'en_atencion']
+            )
+            
+            if turno_activo_existente.exists():
+                raise forms.ValidationError(
+                    f'Lo sentimos, el horario {hora.strftime("%H:%M")} ya no está disponible para este médico. '
+                    'Por favor, seleccione otro horario.'
+                )
+        
+        return cleaned_data
 
 
 class AtenderTurnoForm(forms.ModelForm):

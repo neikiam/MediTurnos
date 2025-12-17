@@ -109,7 +109,7 @@
                                     </p>
                                 </div>
                                 <div class="col-auto">
-                                    <span class="badge bg-{{ turno.get_estado_color }} mb-2">{{ turno.get_estado_display }}</span><br>
+                                    <span class="badge-estado {{ turno.get_estado_badge_class }} mb-2">{{ turno.get_estado_display }}</span><br>
                                     {% if turno.puede_cancelar %}
                                     <a href="{% url 'paciente_cancelar_turno' turno.pk %}" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-x-circle"></i> Cancelar
@@ -152,7 +152,7 @@
                                         {{ turno.fecha|date:"d/m/Y" }} - {{ turno.especialidad.nombre }}
                                     </small>
                                 </div>
-                                <span class="badge bg-{{ turno.get_estado_color }} small">{{ turno.get_estado_display }}</span>
+                                <span class="badge-estado {{ turno.get_estado_badge_class }} small">{{ turno.get_estado_display }}</span>
                             </div>
                         </div>
                         {% endfor %}

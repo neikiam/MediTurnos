@@ -2181,6 +2181,23 @@ small {
     border: 1px solid #ab47bc;
 }
 
+.badge-rechazado {
+    background: #ffcdd2;
+    color: #b71c1c;
+    border: 2px solid #d32f2f;
+    font-weight: 700;
+    animation: pulse-rechazado 2s ease-in-out infinite;
+}
+
+@keyframes pulse-rechazado {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(211, 47, 47, 0);
+    }
+}
+
 .badge-estado i {
     font-size: 1rem;
 }
