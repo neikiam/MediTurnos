@@ -910,6 +910,11 @@ textarea.form-control {
     background: transparent !important;
     padding: 0 !important;
     margin-right: var(--spacing-md) !important;
+    width: 60px !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .flex-shrink-0 i {
@@ -917,25 +922,50 @@ textarea.form-control {
 }
 
 .flex-shrink-0 .bi-clock {
-    color: var(--color-warning) !important;
+    color: #d49535 !important;
 }
 
 .flex-shrink-0 .bi-check-circle {
-    color: var(--color-success) !important;
+    color: #5da888 !important;
 }
 
 .flex-shrink-0 .bi-graph-up {
-    color: var(--color-info) !important;
-}
-
-/* Iconos en list-group */
-.list-group-item i {
-    font-size: 1.75rem !important;
+    color: #4a82rem !important;
+    min-width: 2rem;
 }
 
 .list-group-item .bi-calendar-plus {
     color: var(--medical-teal) !important;
 }
+
+.list-group-item .bi-person-plus {
+    color: #5da888 !important;
+}
+
+.list-group-item .bi-heart-pulse {
+    color: #4a8a9d !important;
+}
+
+.list-group-item .bi-graph-up,
+.list-group-item .bi-lightning-charge {
+    color: #d49535 !important;
+}
+
+.list-group-item .bi-clock-history {
+    color: #4a8a9d !important;
+}
+
+/* Texto en list-group más legible */
+.list-group-item h6 {
+    color: var(--medical-dark) !important;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.list-group-item small {
+    color: #6c757d !important;
+    font-size: 0.875rem
 
 .list-group-item .bi-person-plus {
     color: var(--color-success) !important;
@@ -1068,7 +1098,7 @@ textarea.form-control {
 }
 
 /* ================================================
-   Clases de estadísticas (para dashboards)
+   Stat card - Iconos consistentes en dashboard
    ================================================ */
 .stat-card {
     background: white;
@@ -1089,6 +1119,63 @@ textarea.form-control {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Iconos de stats - tamaño y color consistente */
+.stat-card i {
+    font-size: 3rem !important;
+    display: block;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Card pequeñas de estadísticas con iconos */
+.card .d-flex .flex-shrink-0 {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card .d-flex .flex-shrink-0 i {
+    font-size: 2rem !important;
+}
+
+/* Colores específicos para iconos de stats pequeños */
+.stat-icon-warning {
+    color: #d49535 !important;
+}
+
+.stat-icon-success {
+    color: #5da888 !important;
+}
+
+.stat-icon-info {
+    color: #4a8a9d !important;
+}
+
+/* Quality card en inicio - mejor contraste */
+.quality-card {
+    background: linear-gradient(135deg, var(--medical-teal) 0%, var(--medical-teal-dark) 100%);
+    box-shadow: var(--shadow-lg);
+}
+
+.quality-card h3 {
+    color: white !important;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.quality-text {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.quality-icon {
+    font-size: 4rem !important;
+    color: white !important;
+    display: block;
 }
 
 /* ================================================
@@ -1562,10 +1649,31 @@ small {
     margin-bottom: 0;
     color: var(--medical-teal-dark);
     font-weight: 700;
+    font-size: 1.25rem !important;
 }
 
-.card-header h5 i {
-    color: var(--medical-teal);
+.card-header .bi-clock-history {
+    color: #4a8a9d !important;
+    font-size: 1.25rem !important;
+}
+
+/* Mejorar contraste en headers */
+.card-header {
+    background: var(--medical-cream) !important;
+}
+
+.card-header.bg-white {
+    background-color: white !important;
+    border-bottom: 2px solid var(--medical-cream);
+}
+
+/* Card body text con buen contraste */
+.card-body {
+    color: var(--medical-dark);
+}
+
+.card-body .text-muted {
+    color: #6c757medical-teal);
 }
 
 .card-footer.bg-white {
