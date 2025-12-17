@@ -45,6 +45,13 @@
   - Prepagas (OSDE, Swiss Medical, Galeno, Medicus, OMINT, etc.)
   - Obras sociales provinciales (IOSPER, APROSS, IPS, etc.)
 - Opción "Particular (sin obra social)" disponible
+- **Migración segura**: Mantiene el campo antiguo para compatibilidad con datos existentes
+
+### Implementación técnica:
+- `obra_social` (CharField): Campo legacy que mantiene los datos antiguos
+- `obra_social_obj` (ForeignKey): Nuevo campo que referencia al modelo ObraSocial
+- Método `get_obra_social_display()`: Prioriza el nuevo campo sobre el antiguo
+- Script de migración automática que intenta emparejar obras sociales existentes
 
 ### Obras sociales incluidas (35 opciones):
 - **15 obras sociales nacionales** más comunes
@@ -65,10 +72,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 3. Cargar las obras sociales:
+### 3. Ejecutar comandos de datos:
 ```bash
 python manage.py cargar_obras_sociales
+python manage.py migrar_obras_sociales
 ```
+
+El comando `migrar_obras_sociales` intentará emparejar automáticamente las obras sociales en texto con las del catálogo. Si no encuentra coincidencia, los pacientes podrán actualizar su obra social desde su perfil.
 
 ### 4. (Opcional) Convertir datos existentes:
 Si ya tienes pacientes con obras sociales en texto, necesitarás crear una migración de datos para convertirlos al nuevo formato.
@@ -97,27 +107,30 @@ Si ya tienes pacientes con obras sociales en texto, necesitarás crear una migra
 
 ## 🔄 Compatibilidad con Render
 
-Todos los cambios son compatibles con el despliegue en Render. Solo necesitas:
+Todos los cambios son compatibles con el despliegue en Render. El [build.sh](build.sh) ya está configurado para:
 
-1. Hacer push de los cambios a tu repositorio
-2. Render ejecutará automáticamente las migraciones
-3. Ejecutar manualmente el comando para cargar obras sociales (una sola vez):
+1. Ejecutar migraciones automáticamente
+2. Cargar el catálogo de obras sociales
+3. Migrar obras sociales existentes de texto a modelo
 
-Puedes agregarlo al `build.sh`:
-```bash
-echo "Cargando obras sociales..."
-python manage.py cargar_obras_sociales
-```
+**No requiere acción manual** - simplemente haz push y Render ejecutará todo automáticamente.
 
 ---
 
 ## 📝 Notas adicionales
 
 ### Migración de datos existentes:
-Si ya tienes pacientes registrados con obras sociales en formato texto, puedes:
-1. Dejar el campo vacío (se mostrará como "Particular")
-2. Crear script de migración para intentar emparejar automáticamente
-3. Pedir a los pacientes que actualicen su perfil
+El sistema mantiene **compatibilidad con datos antiguos**:
+- Campo `obra_social` (texto): Se mantiene con los datos legacy
+- Campo `obra_social_obj` (ForeignKey): Nuevo campo para el modelo
+- El script de migración intenta emparejar automáticamente por nombre o sigla
+- Si no hay coincidencia, el paciente puede actualizar su perfil manualmente
+
+### Para limpiar datos legacy (opcional):
+Una vez que todos los pacientes hayan migrado a `obra_social_obj`, puedes:
+1. Eliminar el campo `obra_social` del modelo
+2. Renombrar `obra_social_obj` a `obra_social`
+3. Crear y aplicar una migración
 
 ### Agregar más obras sociales:
 Simplemente edita el archivo `appointments/management/commands/cargar_obras_sociales.py` y vuelve a ejecutar el comando.

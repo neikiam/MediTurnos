@@ -62,4 +62,7 @@ EOF
 echo "Cargando obras sociales..."
 python manage.py cargar_obras_sociales
 
+echo "Migrando obras sociales existentes..."
+python manage.py migrar_obras_sociales
+
 echo "Build completado exitosamente"

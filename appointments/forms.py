@@ -41,7 +41,7 @@ class RegistroPacienteForm(UserCreationForm):
         
         return fecha_nac
     
-    obra_social = forms.ModelChoiceField(
+    obra_social_obj = forms.ModelChoiceField(
         queryset=ObraSocial.objects.filter(activo=True),
         required=False,
         label='Obra Social',
@@ -70,7 +70,7 @@ class RegistroPacienteForm(UserCreationForm):
             # Crear perfil de paciente
             Paciente.objects.create(
                 usuario=user,
-                obra_social=self.cleaned_data.get('obra_social'),
+                obra_social_obj=self.cleaned_data.get('obra_social_obj'),
                 numero_afiliado=self.cleaned_data.get('numero_afiliado', '')
             )
         return user
@@ -340,9 +340,9 @@ class PerfilPacienteForm(forms.ModelForm):
     
     class Meta:
         model = Paciente
-        fields = ['obra_social', 'numero_afiliado', 'observaciones']
+        fields = ['obra_social_obj', 'numero_afiliado', 'observaciones']
         widgets = {
-            'obra_social': forms.Select(attrs={'class': 'form-control'}),
+            'obra_social_obj': forms.Select(attrs={'class': 'form-control'}),
             'numero_afiliado': forms.TextInput(attrs={'class': 'form-control'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -357,5 +357,6 @@ class PerfilPacienteForm(forms.ModelForm):
             self.fields['direccion'].initial = self.instance.usuario.direccion
         
         # Configurar obra social
-        self.fields['obra_social'].empty_label = 'Particular (sin obra social)'
-        self.fields['obra_social'].queryset = ObraSocial.objects.filter(activo=True)
+        self.fields['obra_social_obj'].label = 'Obra Social'
+        self.fields['obra_social_obj'].empty_label = 'Particular (sin obra social)'
+        self.fields['obra_social_obj'].queryset = ObraSocial.objects.filter(activo=True)

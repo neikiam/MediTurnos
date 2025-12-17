@@ -117,7 +117,8 @@ class HorarioAtencion(models.Model):
 # Modelo de Paciente (Perfil extendido)
 class Paciente(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='perfil_paciente')
-    obra_social = models.ForeignKey(ObraSocial, on_delete=models.SET_NULL, null=True, blank=True, related_name='pacientes')
+    obra_social = models.CharField(max_length=100, blank=True, help_text='Campo legacy - usar obra_social_obj')
+    obra_social_obj = models.ForeignKey(ObraSocial, on_delete=models.SET_NULL, null=True, blank=True, related_name='pacientes', verbose_name='Obra Social')
     numero_afiliado = models.CharField(max_length=50, blank=True)
     observaciones = models.TextField(blank=True)
     
@@ -128,6 +129,14 @@ class Paciente(models.Model):
     
     def __str__(self):
         return self.usuario.get_full_name()
+    
+    def get_obra_social_display(self):
+        """Retorna la obra social, priorizando el objeto sobre el texto legacy"""
+        if self.obra_social_obj:
+            return str(self.obra_social_obj)
+        elif self.obra_social:
+            return self.obra_social
+        return 'Particular'
 
 
 # Modelo de Turno

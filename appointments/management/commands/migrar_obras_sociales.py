@@ -8,34 +8,47 @@ from appointments.models import Paciente, ObraSocial
 
 
 class Command(BaseCommand):
-    help = 'Migra obras sociales de texto a modelo ObraSocial'
+    help = 'Migra obras sociales de campo texto (obra_social) a ForeignKey (obra_social_obj)'
     
     def handle(self, *args, **kwargs):
-        # Obtener todos los pacientes
-        pacientes = Paciente.objects.all()
+        # Obtener todos los pacientes que tienen texto pero no FK
+        pacientes = Paciente.objects.filter(
+            obra_social_obj__isnull=True
+        ).exclude(
+            Q(obra_social='') | Q(obra_social__isnull=True)
+        )
+        
         total = pacientes.count()
         migrados = 0
-        sin_obra_social = 0
-        no_encontrados = 0
+        no_encontrados = []
         
-        self.stdout.write(f'Procesando {total} pacientes...\n')
+        self.stdout.write(f'Procesando {total} pacientes con obra social en texto...\n')
         
         for paciente in pacientes:
-            # Si ya tiene obra social asignada (FK), saltar
-            if paciente.obra_social:
-                continue
+            obra_social_texto = paciente.obra_social.strip()
             
-            # Si tiene texto en obra_social_texto (campo antiguo que ya no existe)
-            # Este script es para referencia, el campo obra_social ahora es FK
-            # Los datos antiguos se perderán en la migración
+            # Buscar coincidencia en obras sociales
+            obra_social_obj = ObraSocial.objects.filter(
+                Q(nombre__icontains=obra_social_texto) |
+                Q(sigla__iexact=obra_social_texto)
+            ).first()
             
-            self.stdout.write(f'Procesando: {paciente.usuario.get_full_name()}')
-            
-            # Marcar como particular (sin obra social)
-            sin_obra_social += 1
-            self.stdout.write(f'  → Sin obra social asignada')
+            if obra_social_obj:
+                paciente.obra_social_obj = obra_social_obj
+                paciente.save()
+                migrados += 1
+                self.stdout.write(f'✓ {paciente.usuario.get_full_name()}: "{obra_social_texto}" → {obra_social_obj}')
+            else:
+                no_encontrados.append((paciente, obra_social_texto))
+                self.stdout.write(f'⚠ {paciente.usuario.get_full_name()}: "{obra_social_texto}" - No se encontró coincidencia')
         
         self.stdout.write(self.style.SUCCESS(f'\n✓ Proceso completado'))
-        self.stdout.write(f'  - Total de pacientes: {total}')
-        self.stdout.write(f'  - Sin obra social: {sin_obra_social}')
-        self.stdout.write(f'  - Nota: Los pacientes pueden actualizar su obra social desde su perfil')
+        self.stdout.write(f'  - Total procesados: {total}')
+        self.stdout.write(f'  - Migrados exitosamente: {migrados}')
+        self.stdout.write(f'  - Sin coincidencia: {len(no_encontrados)}')
+        
+        if no_encontrados:
+            self.stdout.write(self.style.WARNING(f'\nObras sociales sin coincidencia:'))
+            for paciente, texto in no_encontrados:
+                self.stdout.write(f'  - "{texto}" (paciente: {paciente.usuario.get_full_name()})')
+            self.stdout.write(f'\nEstos pacientes pueden actualizar su obra social desde su perfil.')
