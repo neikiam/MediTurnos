@@ -11,7 +11,15 @@ pip install -r requirements.txt --no-cache-dir
 
 echo "Ejecutando migraciones..."
 python manage.py makemigrations --noinput
-python manage.py migrate --noinput --fake-initial
+
+# Intentar migrar, si falla por tabla duplicada, hacer fake de la migración
+python manage.py migrate --noinput 2>&1 | tee /tmp/migrate.log
+if grep -q "relation.*already exists" /tmp/migrate.log; then
+    echo "Detectado error de tabla duplicada, marcando migración 0002 como fake..."
+    python manage.py migrate appointments 0002 --fake
+    echo "Reintentando migraciones..."
+    python manage.py migrate --noinput
+fi
 
 echo "Colectando archivos estáticos..."
 python manage.py collectstatic --no-input --clear
