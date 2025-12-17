@@ -93,10 +93,18 @@
                             <td><span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span></td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'admin_turno_editar' turno.pk %}" class="btn btn-outline-primary">
+                                    {% if turno.estado == 'pendiente' %}
+                                        <button class="btn btn-success" onclick="cambiarEstado({{ turno.pk }}, 'activo')" title="Validar turno">
+                                            <i class="bi bi-check-circle"></i> Validar
+                                        </button>
+                                        <button class="btn btn-danger" onclick="cambiarEstado({{ turno.pk }}, 'rechazado')" title="Rechazar turno">
+                                            <i class="bi bi-x-circle"></i> Rechazar
+                                        </button>
+                                    {% endif %}
+                                    <a href="{% url 'admin_turno_editar' turno.pk %}" class="btn btn-outline-primary" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{% url 'admin_turno_eliminar' turno.pk %}" class="btn btn-outline-danger">
+                                    <a href="{% url 'admin_turno_eliminar' turno.pk %}" class="btn btn-outline-danger" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -116,4 +124,48 @@
         </div>
     </div>
 </div>
+
+<script>
+function cambiarEstado(turnoId, nuevoEstado) {
+    if (!confirm(`¿Está seguro que desea ${nuevoEstado === 'activo' ? 'validar' : 'rechazar'} este turno?`)) {
+        return;
+    }
+    
+    fetch(`/admin-panel/turnos/${turnoId}/cambiar-estado/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ estado: nuevoEstado })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar el estado del turno');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

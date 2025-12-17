@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
 from datetime import timedelta
 
 from ..models import (
@@ -455,6 +458,60 @@ def admin_turno_validar(request, pk):
         return redirect('admin_turnos')
     
     return render(request, 'appointments/admin/turno_validar.html', {'turno': turno})
+
+
+@login_required
+@require_POST
+def admin_turno_cambiar_estado(request, pk):
+    """Cambiar estado de un turno vía AJAX"""
+    if request.user.rol != 'admin':
+        return JsonResponse({'success': False, 'message': 'No tienes permisos.'}, status=403)
+    
+    try:
+        turno = get_object_or_404(Turno, pk=pk)
+        
+        if turno.estado != 'pendiente':
+            return JsonResponse({
+                'success': False,
+                'message': 'Este turno no está pendiente de validación.'
+            }, status=400)
+        
+        data = json.loads(request.body)
+        nuevo_estado = data.get('estado')
+        
+        if nuevo_estado == 'activo':
+            # Verificar que no haya sobreposición
+            if turno.tiene_sobreposicion():
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Ya existe otro turno activo en el mismo horario para este médico.'
+                }, status=400)
+            
+            turno.estado = 'activo'
+            turno.save()
+            return JsonResponse({
+                'success': True,
+                'message': f'Turno validado correctamente. El paciente {turno.paciente.usuario.get_full_name()} ha sido notificado.'
+            })
+            
+        elif nuevo_estado == 'rechazado':
+            turno.estado = 'rechazado'
+            turno.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'Turno rechazado correctamente.'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Estado no válido.'
+            }, status=400)
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
 
 
 # --- Estadísticas ---

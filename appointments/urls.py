@@ -40,6 +40,7 @@ urlpatterns = [
     path('admin-panel/turnos/<int:pk>/editar/', views.admin_turno_editar, name='admin_turno_editar'),
     path('admin-panel/turnos/<int:pk>/eliminar/', views.admin_turno_eliminar, name='admin_turno_eliminar'),
     path('admin-panel/turnos/<int:pk>/validar/', views.admin_turno_validar, name='admin_turno_validar'),
+    path('admin-panel/turnos/<int:pk>/cambiar-estado/', views.admin_turno_cambiar_estado, name='admin_turno_cambiar_estado'),
     
     # Estadísticas
     path('admin-panel/estadisticas/', views.admin_estadisticas, name='admin_estadisticas'),
