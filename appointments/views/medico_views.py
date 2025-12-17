@@ -23,6 +23,7 @@ def medico_dashboard(request):
     
     medico = request.user.perfil_medico
     hoy = timezone.now().date()
+    ahora = timezone.now()
     
     # Turnos de hoy (solo activos y en proceso)
     turnos_hoy = Turno.objects.filter(
@@ -30,6 +31,11 @@ def medico_dashboard(request):
         fecha=hoy,
         estado__in=['activo', 'en_atencion', 'atendido']
     ).select_related('paciente__usuario', 'especialidad').order_by('hora')
+    
+    # Agregar información de si cada turno ya pasó
+    for turno in turnos_hoy:
+        fecha_hora_turno = timezone.make_aware(datetime.combine(turno.fecha, turno.hora))
+        turno.ya_paso = fecha_hora_turno <= ahora
     
     # Próximos turnos (solo activos)
     proximos_turnos = Turno.objects.filter(
@@ -137,6 +143,12 @@ def medico_agenda(request):
         estado__in=['activo', 'en_atencion', 'atendido', 'ausente']
     ).select_related('paciente__usuario', 'especialidad').order_by('hora')
     
+    # Agregar información de si cada turno ya pasó
+    ahora = timezone.now()
+    for turno in turnos:
+        fecha_hora_turno = timezone.make_aware(datetime.combine(turno.fecha, turno.hora))
+        turno.ya_paso = fecha_hora_turno <= ahora
+    
     # Calcular mes anterior y siguiente
     if mes == 1:
         mes_anterior, año_anterior = 12, año - 1
@@ -178,7 +190,17 @@ def medico_atender_turno(request, pk):
     
     turno = get_object_or_404(Turno, pk=pk, medico=request.user.perfil_medico)
     
+    # Verificar que la fecha y hora del turno ya hayan pasado
+    ahora = timezone.now()
+    fecha_hora_turno = timezone.make_aware(datetime.combine(turno.fecha, turno.hora))
+    turno_ya_paso = fecha_hora_turno <= ahora
+    
+    # Solo permitir modificar el estado si el turno ya pasó
     if request.method == 'POST':
+        if not turno_ya_paso:
+            messages.error(request, 'No puedes atender un turno que aún no ha llegado. Espera a que llegue la fecha y hora programada.')
+            return redirect('medico_agenda')
+        
         form = AtenderTurnoForm(request.POST, instance=turno)
         if form.is_valid():
             form.save()
@@ -190,6 +212,8 @@ def medico_atender_turno(request, pk):
     context = {
         'turno': turno,
         'form': form,
+        'turno_ya_paso': turno_ya_paso,
+        'fecha_hora_turno': fecha_hora_turno,
     }
     return render(request, 'appointments/medico/atender_turno.html', context)
 

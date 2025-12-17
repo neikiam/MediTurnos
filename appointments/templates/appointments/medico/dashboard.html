@@ -86,9 +86,15 @@
                                 <div class="col-auto">
                                     <span class="badge bg-{{ turno.get_estado_color }} me-2">{{ turno.get_estado_display }}</span>
                                     {% if turno.estado not in 'atendido,cancelado_medico,cancelado_paciente,ausente' %}
-                                    <a href="{% url 'medico_atender_turno' turno.pk %}" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-clipboard-check"></i> Atender
-                                    </a>
+                                        {% if turno.ya_paso %}
+                                        <a href="{% url 'medico_atender_turno' turno.pk %}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-clipboard-check"></i> Atender
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-secondary" disabled title="El turno aún no ha llegado">
+                                            <i class="bi bi-clock"></i> Pendiente
+                                        </button>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
