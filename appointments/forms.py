@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import Q
 from .models import Usuario, Paciente, Medico, Especialidad, Turno, HorarioAtencion
 from .utils import es_dia_laboral, es_feriado
 from datetime import datetime, time, date
@@ -98,6 +99,48 @@ class MedicoForm(forms.ModelForm):
             'foto': forms.FileInput(attrs={'class': 'form-control'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+
+class AsignarMedicoForm(forms.Form):
+    """Formulario para buscar y asignar rol de médico a usuario existente"""
+    buscar = forms.CharField(
+        max_length=100,
+        required=False,
+        label='Buscar usuario por nombre, apellido, email o DNI',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingrese nombre, apellido, email o DNI...'
+        })
+    )
+    usuario = forms.ModelChoiceField(
+        queryset=Usuario.objects.none(),
+        required=False,
+        label='Seleccionar Usuario',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label='-- Seleccione un usuario --'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        busqueda = kwargs.pop('busqueda', None)
+        super().__init__(*args, **kwargs)
+        
+        # Solo mostrar usuarios que no sean médicos ni admins
+        queryset = Usuario.objects.filter(rol='paciente')
+        
+        if busqueda:
+            # Filtrar por búsqueda
+            queryset = queryset.filter(
+                Q(first_name__icontains=busqueda) |
+                Q(last_name__icontains=busqueda) |
+                Q(email__icontains=busqueda) |
+                Q(dni__icontains=busqueda) |
+                Q(username__icontains=busqueda)
+            )
+        
+        self.fields['usuario'].queryset = queryset
+        
+        # Personalizar la representación del usuario
+        self.fields['usuario'].label_from_instance = lambda obj: f"{obj.get_full_name()} - {obj.email} (DNI: {obj.dni})"
 
 
 class HorarioAtencionForm(forms.ModelForm):

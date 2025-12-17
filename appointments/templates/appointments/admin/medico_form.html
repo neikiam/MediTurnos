@@ -1,34 +1,175 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 
-{% block title %}{{ accion }} Médico - MediTurnos{% endblock %}
+{% block title %}{{ accion }} - MediTurnos{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-person-badge"></i> {{ accion }} Médico
+                        <i class="bi bi-person-badge"></i> {{ accion }}
                     </h5>
                 </div>
                 <div class="card-body p-4">
+                    
+                    <!-- Buscador de Usuarios -->
+                    <div class="mb-4 p-4 bg-light rounded">
+                        <h6 class="fw-bold mb-3">
+                            <i class="bi bi-search"></i> Buscar Usuario para Asignar como Médico
+                        </h6>
+                        <form method="get" class="mb-3">
+                            <div class="row g-2">
+                                <div class="col-md-9">
+                                    <input type="text" 
+                                           name="buscar" 
+                                           class="form-control" 
+                                           placeholder="Buscar por nombre, apellido, email o DNI..."
+                                           value="{{ busqueda }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        {% if busqueda %}
+                            <div class="mt-3">
+                                <h6 class="text-muted mb-2">Resultados de búsqueda:</h6>
+                                {% if usuarios_encontrados %}
+                                    <div class="list-group">
+                                        {% for usuario in usuarios_encontrados %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ usuario.get_full_name }}</h6>
+                                                    <small class="text-muted">
+                                                        Email: {{ usuario.email }} | DNI: {{ usuario.dni }} | Usuario: {{ usuario.username }}
+                                                    </small>
+                                                </div>
+                                                <span class="badge bg-info">{{ usuario.get_rol_display }}</span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        <small>Se encontraron {{ usuarios_encontrados|length }} usuario(s). Seleccione uno en el formulario abajo.</small>
+                                    </p>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        No se encontraron usuarios disponibles con ese criterio de búsqueda.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle"></i> 
+                                Ingrese un término de búsqueda para encontrar usuarios que puedan ser asignados como médicos.
+                            </p>
+                        {% endif %}
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Formulario de Asignación -->
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <h6 class="fw-bold mb-3 text-primary">Datos de Usuario</h6>
-                        {{ user_form|crispy }}
+                        <h6 class="fw-bold mb-3 text-primary">
+                            <i class="bi bi-person-check"></i> Seleccionar Usuario
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ asignar_form.usuario.id_for_label }}" class="form-label">
+                                {{ asignar_form.usuario.label }}
+                            </label>
+                            {{ asignar_form.usuario }}
+                            {% if asignar_form.usuario.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ asignar_form.usuario.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Seleccione el usuario de la lista. Si no aparece, use el buscador de arriba.
+                            </small>
+                        </div>
                         
                         <hr class="my-4">
                         
-                        <h6 class="fw-bold mb-3 text-primary">Datos Profesionales</h6>
-                        {{ medico_form|crispy }}
+                        <h6 class="fw-bold mb-3 text-primary">
+                            <i class="bi bi-briefcase"></i> Datos Profesionales del Médico
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ medico_form.matricula.id_for_label }}" class="form-label">
+                                {{ medico_form.matricula.label }}
+                            </label>
+                            {{ medico_form.matricula }}
+                            {% if medico_form.matricula.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ medico_form.matricula.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ medico_form.especialidades.id_for_label }}" class="form-label">
+                                {{ medico_form.especialidades.label }}
+                            </label>
+                            <div class="border rounded p-3 bg-white">
+                                {{ medico_form.especialidades }}
+                            </div>
+                            {% if medico_form.especialidades.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ medico_form.especialidades.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ medico_form.biografia.id_for_label }}" class="form-label">
+                                {{ medico_form.biografia.label }}
+                            </label>
+                            {{ medico_form.biografia }}
+                            {% if medico_form.biografia.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ medico_form.biografia.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ medico_form.foto.id_for_label }}" class="form-label">
+                                {{ medico_form.foto.label }}
+                            </label>
+                            {{ medico_form.foto }}
+                            {% if medico_form.foto.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ medico_form.foto.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ medico_form.activo }}
+                            <label class="form-check-label" for="{{ medico_form.activo.id_for_label }}">
+                                {{ medico_form.activo.label }}
+                            </label>
+                            {% if medico_form.activo.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ medico_form.activo.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
                         
                         <div class="d-flex gap-2 mt-4">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Guardar
+                                <i class="bi bi-check-circle"></i> Asignar como Médico
                             </button>
                             <a href="{% url 'admin_medicos' %}" class="btn btn-secondary">
                                 <i class="bi bi-x-circle"></i> Cancelar

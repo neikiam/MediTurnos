@@ -4,7 +4,7 @@ Vistas del panel de administrador
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
 
@@ -14,7 +14,7 @@ from ..models import (
 )
 from ..forms import (
     EspecialidadForm, MedicoUsuarioForm, MedicoForm,
-    HorarioAtencionForm, TurnoForm
+    HorarioAtencionForm, TurnoForm, AsignarMedicoForm
 )
 
 @login_required
@@ -137,42 +137,68 @@ def admin_medicos(request):
 
 @login_required
 def admin_medico_crear(request):
-    """Crear nuevo médico"""
+    """Asignar rol de médico a usuario existente"""
     if request.user.rol != 'admin':
         messages.error(request, 'No tienes permisos.')
         return redirect('dashboard')
     
+    busqueda = request.GET.get('buscar', '')
+    usuario_seleccionado = None
+    usuarios_encontrados = []
+    
     if request.method == 'POST':
-        user_form = MedicoUsuarioForm(request.POST)
+        asignar_form = AsignarMedicoForm(request.POST, busqueda=busqueda)
         medico_form = MedicoForm(request.POST, request.FILES)
         
-        if user_form.is_valid() and medico_form.is_valid():
-            # Crear usuario
-            user = user_form.save(commit=False)
-            user.rol = 'medico'
-            password = user_form.cleaned_data.get('password')
-            if password:
-                user.set_password(password)
+        if 'buscar_usuarios' in request.POST:
+            # Solo buscar usuarios
+            busqueda = request.POST.get('buscar', '')
+            asignar_form = AsignarMedicoForm(busqueda=busqueda)
+            medico_form = MedicoForm()
+            
+        elif asignar_form.is_valid() and medico_form.is_valid():
+            usuario = asignar_form.cleaned_data.get('usuario')
+            
+            if not usuario:
+                messages.error(request, 'Debe seleccionar un usuario.')
             else:
-                user.set_password('medico123')  # Contraseña por defecto
-            user.save()
-            
-            # Crear perfil de médico
-            medico = medico_form.save(commit=False)
-            medico.usuario = user
-            medico.save()
-            medico_form.save_m2m()  # Guardar relaciones ManyToMany
-            
-            messages.success(request, f'Médico {user.get_full_name()} creado correctamente.')
-            return redirect('admin_medicos')
+                # Verificar que el usuario no sea ya médico
+                if hasattr(usuario, 'medico'):
+                    messages.error(request, f'{usuario.get_full_name()} ya es médico.')
+                else:
+                    # Cambiar rol del usuario
+                    usuario.rol = 'medico'
+                    usuario.save()
+                    
+                    # Crear perfil de médico
+                    medico = medico_form.save(commit=False)
+                    medico.usuario = usuario
+                    medico.save()
+                    medico_form.save_m2m()  # Guardar relaciones ManyToMany
+                    
+                    messages.success(request, f'{usuario.get_full_name()} ahora es médico.')
+                    return redirect('admin_medicos')
     else:
-        user_form = MedicoUsuarioForm()
+        asignar_form = AsignarMedicoForm(busqueda=busqueda)
         medico_form = MedicoForm()
     
+    # Obtener usuarios disponibles para mostrar en la búsqueda
+    if busqueda:
+        usuarios_encontrados = Usuario.objects.filter(
+            Q(first_name__icontains=busqueda) |
+            Q(last_name__icontains=busqueda) |
+            Q(email__icontains=busqueda) |
+            Q(dni__icontains=busqueda) |
+            Q(username__icontains=busqueda),
+            rol='paciente'
+        )[:10]  # Limitar a 10 resultados
+    
     context = {
-        'user_form': user_form,
+        'asignar_form': asignar_form,
         'medico_form': medico_form,
-        'accion': 'Crear'
+        'accion': 'Asignar Médico',
+        'busqueda': busqueda,
+        'usuarios_encontrados': usuarios_encontrados,
     }
     return render(request, 'appointments/admin/medico_form.html', context)
 
@@ -780,4 +806,5 @@ def api_horarios_disponibles(request):
             # Incrementar 30 minutos
             hora_actual = (datetime.combine(fecha, hora_actual) + timedelta(minutes=30)).time()
     
-    return JsonResponse(slots_disponibles, safe=False)
+    return JsonResponse(slots_disponibles, safe=False)
+
