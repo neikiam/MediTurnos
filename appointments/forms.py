@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
-from .models import Usuario, Paciente, Medico, Especialidad, Turno, HorarioAtencion
+from .models import Usuario, Paciente, Medico, Especialidad, Turno, HorarioAtencion, ObraSocial
 from .utils import es_dia_laboral, es_feriado
 from datetime import datetime, time, date
 
@@ -19,10 +19,35 @@ class RegistroPacienteForm(UserCreationForm):
             'type': 'date',
             'class': 'form-control',
             'placeholder': 'dd/mm/aaaa',
-            'data-allow-past': 'true'
+            'data-allow-past': 'true',
+            'max': date.today().isoformat()
         })
     )
-    obra_social = forms.CharField(max_length=100, required=False, label='Obra Social')
+    
+    def clean_fecha_nacimiento(self):
+        fecha_nac = self.cleaned_data.get('fecha_nacimiento')
+        
+        if fecha_nac:
+            # Validar que no sea fecha futura
+            if fecha_nac > date.today():
+                raise forms.ValidationError('La fecha de nacimiento no puede ser posterior a la fecha actual. Por favor, ingrese una fecha de nacimiento válida.')
+            
+            # Validar edad mínima (18 años)
+            hoy = date.today()
+            edad = hoy.year - fecha_nac.year - ((hoy.month, hoy.day) < (fecha_nac.month, fecha_nac.day))
+            
+            if edad < 18:
+                raise forms.ValidationError('Debe tener al menos 18 años para registrarse y solicitar turnos de forma autónoma. Si es menor de edad, debe asistir con un adulto responsable.')
+        
+        return fecha_nac
+    
+    obra_social = forms.ModelChoiceField(
+        queryset=ObraSocial.objects.filter(activo=True),
+        required=False,
+        label='Obra Social',
+        empty_label='Particular (sin obra social)',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     numero_afiliado = forms.CharField(max_length=50, required=False, label='Número de Afiliado')
     
     class Meta:
@@ -45,7 +70,7 @@ class RegistroPacienteForm(UserCreationForm):
             # Crear perfil de paciente
             Paciente.objects.create(
                 usuario=user,
-                obra_social=self.cleaned_data.get('obra_social', ''),
+                obra_social=self.cleaned_data.get('obra_social'),
                 numero_afiliado=self.cleaned_data.get('numero_afiliado', '')
             )
         return user
@@ -239,10 +264,21 @@ class PacienteTurnoForm(forms.ModelForm):
         label='Especialidad',
         widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_especialidad'})
     )
+    medico_busqueda = forms.CharField(
+        required=False,
+        label='Buscar Médico (Opcional)',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'id_medico_busqueda',
+            'placeholder': 'Buscar médico por nombre...',
+            'autocomplete': 'off'
+        })
+    )
     medico = forms.ModelChoiceField(
         queryset=Medico.objects.filter(activo=True),
         label='Médico',
-        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_medico'})
+        required=False,
+        widget=forms.HiddenInput(attrs={'id': 'id_medico'})
     )
     
     class Meta:
@@ -306,7 +342,7 @@ class PerfilPacienteForm(forms.ModelForm):
         model = Paciente
         fields = ['obra_social', 'numero_afiliado', 'observaciones']
         widgets = {
-            'obra_social': forms.TextInput(attrs={'class': 'form-control'}),
+            'obra_social': forms.Select(attrs={'class': 'form-control'}),
             'numero_afiliado': forms.TextInput(attrs={'class': 'form-control'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -319,3 +355,7 @@ class PerfilPacienteForm(forms.ModelForm):
             self.fields['email'].initial = self.instance.usuario.email
             self.fields['telefono'].initial = self.instance.usuario.telefono
             self.fields['direccion'].initial = self.instance.usuario.direccion
+        
+        # Configurar obra social
+        self.fields['obra_social'].empty_label = 'Particular (sin obra social)'
+        self.fields['obra_social'].queryset = ObraSocial.objects.filter(activo=True)

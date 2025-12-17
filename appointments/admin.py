@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     Usuario, Paciente, Medico, Especialidad, 
-    Turno, HorarioAtencion, ConfiguracionSistema
+    Turno, HorarioAtencion, ConfiguracionSistema, ObraSocial
 )
 
 
@@ -26,6 +26,14 @@ class EspecialidadAdmin(admin.ModelAdmin):
     search_fields = ['nombre']
 
 
+@admin.register(ObraSocial)
+class ObraSocialAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'sigla', 'activo', 'orden']
+    list_filter = ['activo']
+    search_fields = ['nombre', 'sigla']
+    ordering = ['orden', 'nombre']
+
+
 @admin.register(Medico)
 class MedicoAdmin(admin.ModelAdmin):
     list_display = ['get_nombre_completo', 'matricula', 'get_especialidades', 'activo']
@@ -44,12 +52,17 @@ class MedicoAdmin(admin.ModelAdmin):
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):
-    list_display = ['get_nombre_completo', 'obra_social', 'numero_afiliado']
+    list_display = ['get_nombre_completo', 'get_obra_social', 'numero_afiliado']
+    list_filter = ['obra_social']
     search_fields = ['usuario__first_name', 'usuario__last_name', 'usuario__dni']
     
     def get_nombre_completo(self, obj):
         return obj.usuario.get_full_name()
     get_nombre_completo.short_description = 'Nombre'
+    
+    def get_obra_social(self, obj):
+        return obj.obra_social.nombre if obj.obra_social else 'Particular'
+    get_obra_social.short_description = 'Obra Social'
 
 
 @admin.register(HorarioAtencion)

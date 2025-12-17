@@ -25,7 +25,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Seleccioná la especialidad y médico para ver los horarios disponibles.
+                        <i class="bi bi-info-circle"></i> Seleccioná la especialidad. Opcionalmente podés elegir un médico específico.
                     </div>
                     
                     <form method="post" id="turnoForm">
@@ -37,9 +37,11 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="id_medico" class="form-label fw-bold">Médico</label>
+                            <label for="id_medico_busqueda" class="form-label fw-bold">Médico (Opcional)</label>
+                            {{ form.medico_busqueda }}
                             {{ form.medico }}
-                            <small class="form-text text-muted">Primero seleccione una especialidad</small>
+                            <div id="medico_resultados" class="list-group mt-1" style="display:none; position:absolute; z-index:1000; max-height:200px; overflow-y:auto;"></div>
+                            <small class="form-text text-muted">Dejá en blanco para ver todos los médicos disponibles de la especialidad</small>
                         </div>
                         
                         <div class="mb-3">
@@ -50,9 +52,9 @@
                         <div class="mb-3">
                             <label for="id_hora" class="form-label fw-bold">Horario</label>
                             <select name="hora" class="form-control" id="id_hora" required>
-                                <option value="">Primero seleccione médico y fecha</option>
+                                <option value="">Primero seleccione especialidad y fecha</option>
                             </select>
-                            <small class="form-text text-muted">Seleccione médico y fecha para ver horarios disponibles</small>
+                            <small class="form-text text-muted">Seleccione especialidad y fecha para ver horarios disponibles</small>
                         </div>
                         
                         <div class="mb-4">
@@ -97,49 +99,107 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
-    // Cargar médicos cuando se selecciona especialidad
-    $('#id_especialidad').change(function() {
-        var especialidadId = $(this).val();
-        $('#id_medico').html('<option value="">Cargando...</option>');
-        $('#id_hora').html('<option value="">Primero seleccione médico y fecha</option>');
-        $('#submitBtn').prop('disabled', true);
+    var medicoSeleccionado = null;
+    
+    // Buscador de médicos
+    $('#id_medico_busqueda').on('input', function() {
+        var query = $(this).val();
+        var especialidadId = $('#id_especialidad').val();
         
-        if (especialidadId) {
+        if (query.length >= 2 && especialidadId) {
             $.ajax({
                 url: '/api/medicos-por-especialidad/' + especialidadId + '/',
                 success: function(data) {
-                    var options = '<option value="">Seleccione un médico</option>';
-                    $.each(data, function(i, medico) {
-                        options += '<option value="' + medico.id + '">' + medico.nombre + '</option>';
+                    var resultados = data.filter(function(medico) {
+                        return medico.nombre.toLowerCase().includes(query.toLowerCase());
                     });
-                    $('#id_medico').html(options);
+                    
+                    if (resultados.length > 0) {
+                        var html = '';
+                        $.each(resultados, function(i, medico) {
+                            html += '<a href="#" class="list-group-item list-group-item-action medico-item" data-id="' + medico.id + '" data-nombre="' + medico.nombre + '">' + medico.nombre + '</a>';
+                        });
+                        $('#medico_resultados').html(html).show();
+                    } else {
+                        $('#medico_resultados').html('<div class="list-group-item">No se encontraron médicos</div>').show();
+                    }
                 }
             });
+        } else if (query.length === 0) {
+            $('#medico_resultados').hide();
+            medicoSeleccionado = null;
+            $('#id_medico').val('');
+            cargarHorarios();
+        } else {
+            $('#medico_resultados').hide();
         }
     });
     
-    // Cargar horarios cuando se selecciona médico y fecha
+    // Seleccionar médico del buscador
+    $(document).on('click', '.medico-item', function(e) {
+        e.preventDefault();
+        medicoSeleccionado = $(this).data('id');
+        $('#id_medico').val(medicoSeleccionado);
+        $('#id_medico_busqueda').val($(this).data('nombre'));
+        $('#medico_resultados').hide();
+        cargarHorarios();
+    });
+    
+    // Ocultar resultados al hacer click fuera
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#id_medico_busqueda, #medico_resultados').length) {
+            $('#medico_resultados').hide();
+        }
+    });
+    
+    // Cargar horarios cuando se selecciona especialidad
+    $('#id_especialidad').change(function() {
+        var especialidadId = $(this).val();
+        $('#id_hora').html('<option value="">Seleccione fecha para ver horarios</option>');
+        $('#submitBtn').prop('disabled', true);
+        
+        // Limpiar búsqueda de médico
+        $('#id_medico_busqueda').val('');
+        $('#id_medico').val('');
+        medicoSeleccionado = null;
+        $('#medico_resultados').hide();
+        
+        if (!especialidadId) {
+            $('#id_hora').html('<option value="">Primero seleccione especialidad y fecha</option>');
+        }
+    });
+    
+    // Cargar horarios cuando se selecciona fecha
     function cargarHorarios() {
+        var especialidadId = $('#id_especialidad').val();
         var medicoId = $('#id_medico').val();
         var fecha = $('#id_fecha').val();
         
-        if (medicoId && fecha) {
+        if (especialidadId && fecha) {
             $('#loading').removeClass('d-none');
             $('#id_hora').html('<option value="">Cargando...</option>');
             $('#submitBtn').prop('disabled', true);
             
+            var url = '/api/horarios-disponibles/';
+            var data = {
+                'especialidad_id': especialidadId,
+                'fecha': fecha
+            };
+            
+            if (medicoId) {
+                data['medico_id'] = medicoId;
+            }
+            
             $.ajax({
-                url: '/api/horarios-disponibles/',
-                data: {
-                    'medico_id': medicoId,
-                    'fecha': fecha
-                },
+                url: url,
+                data: data,
                 success: function(data) {
                     $('#loading').addClass('d-none');
                     if (Array.isArray(data) && data.length > 0) {
                         var options = '<option value="">Seleccione un horario</option>';
                         $.each(data, function(i, slot) {
-                            options += '<option value="' + slot.hora + '">' + slot.hora + '</option>';
+                            var medicoInfo = slot.medico ? ' - ' + slot.medico : '';
+                            options += '<option value="' + slot.hora + '" data-medico-id="' + (slot.medico_id || '') + '">' + slot.hora + medicoInfo + '</option>';
                         });
                         $('#id_hora').html(options);
                     } else {
@@ -150,14 +210,12 @@ $(document).ready(function() {
                     $('#loading').addClass('d-none');
                     var errorMsg = 'Error al cargar horarios';
                     
-                    // Mostrar mensaje específico si viene del servidor
                     if (xhr.responseJSON && xhr.responseJSON.error) {
                         errorMsg = xhr.responseJSON.error;
                     }
                     
                     $('#id_hora').html('<option value="">' + errorMsg + '</option>');
                     
-                    // Mostrar alerta al usuario
                     if (xhr.responseJSON && xhr.responseJSON.error) {
                         alert(errorMsg);
                     }
@@ -166,12 +224,15 @@ $(document).ready(function() {
         }
     }
     
-    $('#id_medico').change(cargarHorarios);
     $('#id_fecha').change(cargarHorarios);
     
-    // Habilitar botón cuando se selecciona horario
+    // Actualizar médico seleccionado cuando se elige un horario (si no se había seleccionado antes)
     $('#id_hora').change(function() {
         if ($(this).val()) {
+            var medicoIdHorario = $(this).find(':selected').data('medico-id');
+            if (medicoIdHorario && !$('#id_medico').val()) {
+                $('#id_medico').val(medicoIdHorario);
+            }
             $('#submitBtn').prop('disabled', false);
         } else {
             $('#submitBtn').prop('disabled', true);

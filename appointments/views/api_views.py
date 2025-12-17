@@ -30,18 +30,18 @@ def api_medicos_por_especialidad(request, especialidad_id):
 
 @login_required
 def api_horarios_disponibles(request):
-    """Obtener horarios disponibles para un médico en una fecha (AJAX)"""
+    """Obtener horarios disponibles para especialidad o médico en una fecha (AJAX)"""
     medico_id = request.GET.get('medico_id')
+    especialidad_id = request.GET.get('especialidad_id')
     fecha_str = request.GET.get('fecha')
     
-    if not medico_id or not fecha_str:
+    if not fecha_str or (not medico_id and not especialidad_id):
         return JsonResponse({'error': 'Faltan parámetros'}, status=400)
     
     try:
-        medico = Medico.objects.get(id=medico_id)
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
     except:
-        return JsonResponse({'error': 'Parámetros inválidos'}, status=400)
+        return JsonResponse({'error': 'Fecha inválida'}, status=400)
     
     # Validar que sea día laboral (no fin de semana ni feriado)
     es_laboral, mensaje = es_dia_laboral(fecha)
@@ -51,37 +51,56 @@ def api_horarios_disponibles(request):
     # Obtener día de la semana (0=Lunes, 6=Domingo)
     dia_semana = fecha.weekday()
     
-    # Obtener horarios de atención del médico para ese día
-    horarios_atencion = HorarioAtencion.objects.filter(
-        medico=medico,
-        dia_semana=dia_semana,
-        activo=True
-    )
+    # Si hay médico específico
+    if medico_id:
+        try:
+            medico = Medico.objects.get(id=medico_id)
+            medicos = [medico]
+        except:
+            return JsonResponse({'error': 'Médico no encontrado'}, status=400)
+    # Si solo hay especialidad, buscar todos los médicos
+    elif especialidad_id:
+        medicos = Medico.objects.filter(
+            especialidades__id=especialidad_id,
+            activo=True
+        )
+    else:
+        return JsonResponse({'error': 'Parámetros inválidos'}, status=400)
     
-    if not horarios_atencion.exists():
-        return JsonResponse([], safe=False)
-    
-    # Generar slots de 30 minutos
+    # Generar slots disponibles
     slots_disponibles = []
     
-    for horario in horarios_atencion:
-        hora_actual = horario.hora_inicio
-        while hora_actual < horario.hora_fin:
-            # Verificar si ya hay turno en ese horario
-            turno_existente = Turno.objects.filter(
-                medico=medico,
-                fecha=fecha,
-                hora=hora_actual,
-                estado__in=['pendiente', 'confirmado', 'en_atencion']
-            ).exists()
-            
-            if not turno_existente:
-                slots_disponibles.append({
-                    'hora': hora_actual.strftime('%H:%M'),
-                    'disponible': True
-                })
-            
-            # Incrementar 30 minutos
-            hora_actual = (datetime.combine(fecha, hora_actual) + timedelta(minutes=30)).time()
+    for medico in medicos:
+        # Obtener horarios de atención del médico para ese día
+        horarios_atencion = HorarioAtencion.objects.filter(
+            medico=medico,
+            dia_semana=dia_semana,
+            activo=True
+        )
+        
+        for horario in horarios_atencion:
+            hora_actual = horario.hora_inicio
+            while hora_actual < horario.hora_fin:
+                # Verificar si ya hay turno en ese horario
+                turno_existente = Turno.objects.filter(
+                    medico=medico,
+                    fecha=fecha,
+                    hora=hora_actual,
+                    estado__in=['pendiente', 'confirmado', 'en_atencion']
+                ).exists()
+                
+                if not turno_existente:
+                    slots_disponibles.append({
+                        'hora': hora_actual.strftime('%H:%M'),
+                        'medico': str(medico),
+                        'medico_id': medico.id,
+                        'disponible': True
+                    })
+                
+                # Incrementar 30 minutos
+                hora_actual = (datetime.combine(fecha, hora_actual) + timedelta(minutes=30)).time()
+    
+    # Ordenar por hora
+    slots_disponibles.sort(key=lambda x: x['hora'])
     
     return JsonResponse(slots_disponibles, safe=False)

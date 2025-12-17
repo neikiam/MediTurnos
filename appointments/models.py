@@ -4,6 +4,23 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from datetime import time
 
+# Modelo de Obra Social
+class ObraSocial(models.Model):
+    nombre = models.CharField(max_length=200, unique=True)
+    sigla = models.CharField(max_length=50, blank=True)
+    activo = models.BooleanField(default=True)
+    orden = models.IntegerField(default=0, help_text="Orden de visualización")
+    
+    class Meta:
+        verbose_name = 'Obra Social'
+        verbose_name_plural = 'Obras Sociales'
+        ordering = ['orden', 'nombre']
+    
+    def __str__(self):
+        if self.sigla:
+            return f"{self.sigla} - {self.nombre}"
+        return self.nombre
+
 # Modelo de Usuario Personalizado
 class Usuario(AbstractUser):
     ROLES = (
@@ -100,7 +117,7 @@ class HorarioAtencion(models.Model):
 # Modelo de Paciente (Perfil extendido)
 class Paciente(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='perfil_paciente')
-    obra_social = models.CharField(max_length=100, blank=True)
+    obra_social = models.ForeignKey(ObraSocial, on_delete=models.SET_NULL, null=True, blank=True, related_name='pacientes')
     numero_afiliado = models.CharField(max_length=50, blank=True)
     observaciones = models.TextField(blank=True)
     

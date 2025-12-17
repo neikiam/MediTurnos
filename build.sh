@@ -23,35 +23,43 @@ import os
 import sys
 
 User = get_user_model()
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
-email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@mediturnos.com')
-password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
-try:
-    # Verificar si el usuario ya existe
-    if User.objects.filter(username=username).exists():
-        print(f'Superuser {username} already exists')
-    else:
-        # Buscar un DNI único
-        dni = '00000000'
-        counter = 0
-        while User.objects.filter(dni=dni).exists():
-            counter += 1
-            dni = f'{counter:08d}'
-        
-        # Crear superusuario
-        user = User.objects.create_superuser(
-            username=username,
-            email=email,
-            password=password,
-            dni=dni,
-            rol='admin'
-        )
-        print(f'Superuser {username} created successfully with DNI {dni}')
-except Exception as e:
-    print(f'Error creating superuser: {e}')
-    # No fallar el build si el superusuario no se puede crear
-    pass
+# Solo crear superusuario si todas las variables de entorno están definidas
+if username and email and password:
+    try:
+        # Verificar si el usuario ya existe
+        if User.objects.filter(username=username).exists():
+            print(f'Superuser {username} already exists')
+        else:
+            # Buscar un DNI único
+            dni = '00000000'
+            counter = 0
+            while User.objects.filter(dni=dni).exists():
+                counter += 1
+                dni = f'{counter:08d}'
+            
+            # Crear superusuario
+            user = User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password,
+                dni=dni,
+                rol='admin'
+            )
+            print(f'Superuser {username} created successfully with DNI {dni}')
+    except Exception as e:
+        print(f'Error creating superuser: {e}')
+        # No fallar el build si el superusuario no se puede crear
+        pass
+else:
+    print('Skipping superuser creation: environment variables not set')
+    print('Required: DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL, DJANGO_SUPERUSER_PASSWORD')
 EOF
+
+echo "Cargando obras sociales..."
+python manage.py cargar_obras_sociales
 
 echo "Build completado exitosamente"
