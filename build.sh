@@ -11,7 +11,7 @@ pip install -r requirements.txt --no-cache-dir
 
 echo "Ejecutando migraciones..."
 python manage.py makemigrations --noinput
-python manage.py migrate --noinput
+python manage.py migrate --noinput --fake-initial
 
 echo "Colectando archivos estáticos..."
 python manage.py collectstatic --no-input --clear
