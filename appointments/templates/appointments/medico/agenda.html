@@ -19,28 +19,106 @@
         </div>
     </div>
     
-    <!-- Selector de fecha -->
+    <!-- Calendario mensual -->
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">Seleccionar Fecha</label>
-                    <input type="date" name="fecha" class="form-control" value="{{ fecha|date:'Y-m-d' }}">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <a href="?mes={{ mes_anterior }}&año={{ año_anterior }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <h4 class="fw-bold mb-0">{{ mes_nombre }} {{ año }}</h4>
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Buscar
-                    </button>
+                    <a href="?mes={{ mes_siguiente }}&año={{ año_siguiente }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
                 </div>
-            </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center" style="table-layout: fixed;">
+                <thead>
+                    <tr class="table-light">
+                        <th class="p-2">Lun</th>
+                        <th class="p-2">Mar</th>
+                        <th class="p-2">Mié</th>
+                        <th class="p-2">Jue</th>
+                        <th class="p-2">Vie</th>
+                        <th class="p-2">Sáb</th>
+                        <th class="p-2">Dom</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for semana in calendario %}
+                    <tr>
+                        {% for dia_info in semana %}
+                        <td class="p-1 calendario-celda 
+                            {% if dia_info.dia == 0 %}bg-light{% endif %}
+                            {% if dia_info.es_hoy %}bg-info bg-opacity-10{% endif %}
+                            {% if dia_info.es_seleccionado %}border-primary border-3{% endif %}"
+                            {% if dia_info.dia != 0 %}
+                            style="cursor: pointer; height: 80px; vertical-align: top;"
+                            onclick="window.location.href='?mes={{ mes }}&año={{ año }}&fecha={{ dia_info.fecha|date:'Y-m-d' }}'"
+                            {% else %}
+                            style="height: 80px;"
+                            {% endif %}>
+                            
+                            {% if dia_info.dia != 0 %}
+                                <div class="d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <span class="fw-bold {% if dia_info.es_hoy %}text-primary{% elif dia_info.es_pasado %}text-muted{% endif %}">
+                                            {{ dia_info.dia }}
+                                        </span>
+                                        {% if dia_info.es_hoy %}
+                                        <span class="badge bg-info" style="font-size: 0.6rem;">HOY</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if dia_info.turnos > 0 %}
+                                    <div class="mt-auto">
+                                        <span class="badge bg-primary rounded-pill">
+                                            {{ dia_info.turnos }} turno{{ dia_info.turnos|pluralize }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Leyenda -->
+            <div class="d-flex gap-3 justify-content-center mt-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="border border-primary border-3" style="width: 20px; height: 20px;"></div>
+                    <small class="text-muted">Día seleccionado</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-info bg-opacity-10" style="width: 20px; height: 20px;"></div>
+                    <small class="text-muted">Hoy</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill">N</span>
+                    <small class="text-muted">Número de turnos</small>
+                </div>
+            </div>
         </div>
     </div>
     
-    <!-- Turnos del día -->
+    <!-- Turnos del día seleccionado -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-0 py-3">
             <h5 class="fw-bold mb-0">
-                Turnos para {{ fecha|date:"l d \d\e F \d\e Y" }}
+                <i class="bi bi-list-check"></i> 
+                Turnos para {{ fecha_seleccionada|date:"l d \d\e F \d\e Y" }}
+                {% if turnos %}
+                <span class="badge bg-primary ms-2">{{ turnos|length }}</span>
+                {% endif %}
             </h5>
         </div>
         <div class="card-body">
@@ -61,10 +139,23 @@
                     <tbody>
                         {% for turno in turnos %}
                         <tr>
-                            <td><strong>{{ turno.hora|time:"H:i" }}</strong></td>
-                            <td>{{ turno.paciente.usuario.get_full_name }}</td>
+                            <td><strong class="text-primary">{{ turno.hora|time:"H:i" }}</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ turno.paciente.usuario.get_full_name }}</div>
+                                    </div>
+                                </div>
+                            </td>
                             <td>{{ turno.paciente.usuario.dni }}</td>
-                            <td>{{ turno.especialidad.nombre }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    {{ turno.especialidad.nombre }}
+                                </span>
+                            </td>
                             <td>{{ turno.motivo_consulta|truncatewords:5|default:"Sin especificar" }}</td>
                             <td><span class="badge bg-{{ turno.get_estado_color }}">{{ turno.get_estado_display }}</span></td>
                             <td class="text-end">
@@ -86,10 +177,38 @@
             {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">No tienes turnos para esta fecha</p>
+                <p class="text-muted mt-3 mb-1">No tienes turnos para esta fecha</p>
+                <small class="text-muted">Selecciona otra fecha en el calendario para ver los turnos</small>
             </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+.calendario-celda {
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.calendario-celda[onclick]:hover {
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    transform: scale(1.02);
+}
+
+.avatar {
+    flex-shrink: 0;
+}
+</style>
+
+<script>
+// Efecto hover para las celdas del calendario
+document.querySelectorAll('.calendario-celda[onclick]').forEach(function(celda) {
+    celda.addEventListener('mouseenter', function() {
+        this.style.boxShadow = '0 0 0 2px rgba(13, 110, 253, 0.25)';
+    });
+    celda.addEventListener('mouseleave', function() {
+        this.style.boxShadow = '';
+    });
+});
+</script>
 {% endblock %}

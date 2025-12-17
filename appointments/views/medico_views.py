@@ -5,7 +5,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from datetime import datetime
+from django.http import JsonResponse
+from django.db.models import Count
+from datetime import datetime, timedelta
+import calendar
 
 from ..models import Turno
 from ..forms import AtenderTurnoForm
@@ -61,34 +64,107 @@ def medico_dashboard(request):
 
 @login_required
 def medico_agenda(request):
-    """Agenda del médico"""
+    """Agenda del médico con calendario mensual"""
     if request.user.rol != 'medico':
         messages.error(request, 'No tienes permisos.')
         return redirect('dashboard')
     
     medico = request.user.perfil_medico
+    hoy = timezone.now().date()
     
-    # Filtro por fecha
+    # Obtener mes y año de los parámetros, o usar mes actual
+    mes = int(request.GET.get('mes', hoy.month))
+    año = int(request.GET.get('año', hoy.year))
+    
+    # Validar mes y año
+    if mes < 1 or mes > 12:
+        mes = hoy.month
+    if año < 2020 or año > 2030:
+        año = hoy.year
+    
+    # Fecha seleccionada para mostrar turnos
     fecha_str = request.GET.get('fecha')
     if fecha_str:
         try:
-            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            fecha_seleccionada = datetime.strptime(fecha_str, '%Y-%m-%d').date()
         except:
-            fecha = timezone.now().date()
+            fecha_seleccionada = hoy
     else:
-        fecha = timezone.now().date()
+        fecha_seleccionada = hoy
     
-    # Turnos del día seleccionado (solo activos y en proceso)
+    # Obtener primer y último día del mes
+    primer_dia = datetime(año, mes, 1).date()
+    ultimo_dia = datetime(año, mes, calendar.monthrange(año, mes)[1]).date()
+    
+    # Contar turnos por día del mes
+    turnos_por_dia = Turno.objects.filter(
+        medico=medico,
+        fecha__gte=primer_dia,
+        fecha__lte=ultimo_dia,
+        estado__in=['activo', 'en_atencion', 'atendido', 'ausente']
+    ).values('fecha').annotate(total=Count('id'))
+    
+    # Crear diccionario con conteo de turnos por fecha
+    conteo_turnos = {item['fecha']: item['total'] for item in turnos_por_dia}
+    
+    # Generar estructura del calendario
+    cal = calendar.monthcalendar(año, mes)
+    
+    # Enriquecer el calendario con el conteo de turnos
+    calendario_con_turnos = []
+    for semana in cal:
+        semana_datos = []
+        for dia in semana:
+            if dia == 0:
+                semana_datos.append({'dia': 0, 'turnos': 0, 'fecha': None})
+            else:
+                fecha_dia = datetime(año, mes, dia).date()
+                num_turnos = conteo_turnos.get(fecha_dia, 0)
+                semana_datos.append({
+                    'dia': dia,
+                    'turnos': num_turnos,
+                    'fecha': fecha_dia,
+                    'es_hoy': fecha_dia == hoy,
+                    'es_pasado': fecha_dia < hoy,
+                    'es_seleccionado': fecha_dia == fecha_seleccionada
+                })
+        calendario_con_turnos.append(semana_datos)
+    
+    # Turnos del día seleccionado
     turnos = Turno.objects.filter(
         medico=medico,
-        fecha=fecha,
+        fecha=fecha_seleccionada,
         estado__in=['activo', 'en_atencion', 'atendido', 'ausente']
     ).select_related('paciente__usuario', 'especialidad').order_by('hora')
     
+    # Calcular mes anterior y siguiente
+    if mes == 1:
+        mes_anterior, año_anterior = 12, año - 1
+    else:
+        mes_anterior, año_anterior = mes - 1, año
+    
+    if mes == 12:
+        mes_siguiente, año_siguiente = 1, año + 1
+    else:
+        mes_siguiente, año_siguiente = mes + 1, año
+    
+    # Nombres de meses en español
+    meses_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    
     context = {
         'medico': medico,
+        'calendario': calendario_con_turnos,
+        'mes': mes,
+        'año': año,
+        'mes_nombre': meses_es[mes - 1],
+        'mes_anterior': mes_anterior,
+        'año_anterior': año_anterior,
+        'mes_siguiente': mes_siguiente,
+        'año_siguiente': año_siguiente,
+        'fecha_seleccionada': fecha_seleccionada,
         'turnos': turnos,
-        'fecha': fecha,
+        'hoy': hoy,
     }
     return render(request, 'appointments/medico/agenda.html', context)
 
