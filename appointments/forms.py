@@ -79,11 +79,10 @@ class RegistroPacienteForm(UserCreationForm):
 class EspecialidadForm(forms.ModelForm):
     class Meta:
         model = Especialidad
-        fields = ['nombre', 'descripcion', 'duracion_turno', 'activo']
+        fields = ['nombre', 'descripcion', 'activo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'duracion_turno': forms.NumberInput(attrs={'class': 'form-control'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

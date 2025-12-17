@@ -21,7 +21,7 @@ class UsuarioAdmin(UserAdmin):
 
 @admin.register(Especialidad)
 class EspecialidadAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'duracion_turno', 'activo', 'fecha_creacion']
+    list_display = ['nombre', 'activo', 'fecha_creacion']
     list_filter = ['activo']
     search_fields = ['nombre']
 
